@@ -22,9 +22,22 @@ PREFERRED_TYPES=(
   com.apple.CoreSimulator.SimDeviceType.iPhone-8-Plus
   com.apple.CoreSimulator.SimDeviceType.iPhone-11-Pro-Max
   com.apple.CoreSimulator.SimDeviceType.iPhone-14-Plus
+  com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro-Max
+  com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro
+  com.apple.CoreSimulator.SimDeviceType.iPhone-17
+  com.apple.CoreSimulator.SimDeviceType.iPhone-Air
   com.apple.CoreSimulator.SimDeviceType.iPhone-16-Plus
   com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro
+  com.apple.CoreSimulator.SimDeviceType.iPhone-16e
   com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro
+)
+
+xcrun simctl list devicetypes --json > .artifacts/sim-device-types.json
+while IFS= read -r type; do
+  PREFERRED_TYPES+=("$type")
+done < <(
+  jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' \
+    .artifacts/sim-device-types.json | sort -r
 )
 
 SIM_ID=""
@@ -32,17 +45,20 @@ SIM_TYPE=""
 SIM_RUNTIME=""
 : > .artifacts/logs/simulator-create.log
 for type in "${PREFERRED_TYPES[@]}"; do
-  if ! xcrun simctl list devicetypes --json | jq -e --arg id "$type" '.devicetypes[] | select(.identifier == $id)' >/dev/null; then
+  if ! jq -e --arg id "$type" '.devicetypes[] | select(.identifier == $id)' \
+    .artifacts/sim-device-types.json >/dev/null; then
     continue
   fi
   for runtime in "${RUNTIMES[@]}"; do
-    candidate="$(xcrun simctl create "ChatGPT Legacy CI" "$type" "$runtime" 2>>.artifacts/logs/simulator-create.log || true)"
-    if [[ -n "$candidate" ]]; then
+    candidate="$(xcrun simctl create "ChatGPT Legacy CI" "$type" "$runtime" 2>&1 || true)"
+    if [[ "$candidate" =~ ^[0-9A-Fa-f-]{36}$ ]]; then
       SIM_ID="$candidate"
       SIM_TYPE="$type"
       SIM_RUNTIME="$runtime"
       break 2
     fi
+    printf '%s / %s: %s\n' "$type" "$runtime" "$candidate" \
+      >> .artifacts/logs/simulator-create.log
   done
 done
 

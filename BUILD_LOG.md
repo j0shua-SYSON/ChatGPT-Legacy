@@ -167,3 +167,8 @@ hosted Xcode compile/test run is the next source-of-truth gate.
   successfully. The validation step then failed before compilation because
   macOS `plutil -lint` rejected the JSON app-icon manifest. Fix: validate the
   asset JSON with `jq empty`; no app source change was required.
+- Run `29682810139` for commit `61ad19a` (2026-07-19): project generation,
+  plist/JSON validation, and `xcodebuild -list` passed on the macOS runner. The
+  simulator step failed before compilation because failed `simctl create` output
+  for iPhone 8 Plus was mistaken for a UUID. Fix: require a UUID-shaped success
+  result and fall back across every available iPhone device type for iOS 26.5.
