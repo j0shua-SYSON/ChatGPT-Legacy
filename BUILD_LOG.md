@@ -113,9 +113,10 @@ must use ChatGPT/Codex OAuth rather than an OpenAI API key.
   composer, message actions, history/account management, settings, and presets.
 - `ChatGPTLegacyTests/`: OAuth migration, SSE, Responses payload, persistence,
   image processing, and exact 414x736/320x568 render tests.
-- `ChatGPTLegacyUITests/`: nine deterministic flows with retained screenshots,
+- `ChatGPTLegacyUITests/`: ten deterministic flows with retained screenshots,
   including OAuth-code, dark-mode, landscape, premium-tour, and accessibility
-  coverage plus Stop/immediate-resend task isolation.
+  coverage plus Stop/immediate-resend task isolation and XCTest's complete
+  automated accessibility audit across three primary surfaces.
 - `project.yml` plus `Info.plist` and asset catalogs: iOS 15 iPhone-only XcodeGen
   project, permissions, adaptive launch color, and a generated opaque app icon.
 - `.github/workflows/ci.yml` and `scripts/ci/`: workspace-local XcodeGen,
@@ -266,6 +267,9 @@ unit/UI tests green before release.
   the SwiftUI environment, landscape capture waits for a settled rotated window,
   and a macOS pixel-sampling gate rejects light dark-mode evidence or black-barred
   landscape evidence automatically.
+- All visual checks are joined as one short-circuiting pipeline before `tee`, so
+  an early appearance or geometry failure cannot be masked by a later passing
+  check when Bash computes the grouped command's exit status.
 - The cleaned MP4 itself contained only app footage, but frame-zero inspection
   showed that `simctl recordVideo` began encoding several seconds after the
   ready marker and missed the opening chat/history beats. The deterministic tour
@@ -279,3 +283,13 @@ unit/UI tests green before release.
   `f11debe9fb9d2d5d3f8a8c89197d2949f2e9f47568fdb635509c8c5f7266b845`.
   It remains intentionally untagged because the dark/landscape visual defects
   above were found during artifact review.
+- Run `29685726791` for commit `3248509` (2026-07-19) passed all 17
+  unit/render tests and 8 of 9 UI tests, then correctly withheld packaging. The
+  sole failure was in the new Stop/immediate-resend test. Its exported UI
+  hierarchy proved the first deterministic chunk ("A good place to begin...")
+  had already arrived before XCTest tapped Stop, so retaining that partial
+  assistant response was correct and the "blank response" assertion was a
+  false positive. The regression flow now opts into a four-second, test-only
+  first-token delay. It can therefore verify both removal of a genuinely empty
+  placeholder and operation-identity isolation for the immediate replacement,
+  without weakening production cancellation behavior.

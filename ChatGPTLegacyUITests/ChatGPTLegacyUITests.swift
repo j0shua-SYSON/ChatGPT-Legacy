@@ -174,7 +174,11 @@ final class ChatGPTLegacyUITests: XCTestCase {
     }
 
     func testStopThenImmediateResendKeepsReplacementStreamActive() {
-        launch(arguments: ["-uiTesting", "-uiTestSignedIn"])
+        launch(arguments: [
+            "-uiTesting",
+            "-uiTestSignedIn",
+            "-uiTestDelayFirstToken"
+        ])
 
         let composer = app.textViews["composer.text"]
         XCTAssertTrue(composer.waitForExistence(timeout: 5))
@@ -198,7 +202,27 @@ final class ChatGPTLegacyUITests: XCTestCase {
         XCTAssertTrue(stop.waitForExistence(timeout: 2))
         RunLoop.current.run(until: Date().addingTimeInterval(0.4))
         XCTAssertTrue(stop.exists, "The cancelled task must not clear the replacement stream")
-        XCTAssertTrue(app.buttons["composer.send"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["composer.send"].waitForExistence(timeout: 8))
+    }
+
+    func testPrimarySurfacesPassAutomatedAccessibilityAudit() throws {
+        guard #available(iOS 17.0, *) else {
+            throw XCTSkip("XCTest accessibility audits require iOS 17 or later")
+        }
+
+        launch(arguments: ["-uiTesting"])
+        XCTAssertTrue(app.buttons["login.continue"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+
+        app.terminate()
+        launch(arguments: ["-uiTesting", "-uiTestDeviceCode"])
+        XCTAssertTrue(app.staticTexts["login.code"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+
+        app.terminate()
+        launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
+        XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
     }
 
     private func launch(arguments: [String]) {

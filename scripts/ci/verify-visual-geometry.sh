@@ -80,6 +80,7 @@ full_directory=.artifacts/screenshots/full
 tour_directory=.artifacts/screenshots/tour
 iphone_plus="$(attachment_path "$full_directory" 'chat-414x736-light')"
 iphone_plus_dark="$(attachment_path "$full_directory" 'chat-414x736-dark')"
+iphone_plus_landscape="$(attachment_path "$full_directory" 'chat-736x414-light')"
 compact="$(attachment_path "$full_directory" 'chat-320x568-light')"
 oauth_code="$(attachment_path "$full_directory" 'oauth-device-code')"
 dark_runtime="$(attachment_path "$full_directory" 'chat-dark')"
@@ -95,15 +96,18 @@ xcrun swiftc \
   -framework AppKit
 
 {
-  expect_dimensions "$iphone_plus" "1242x2208"
-  expect_dimensions "$iphone_plus_dark" "1242x2208"
-  expect_dimensions "$compact" "960x1704"
-  reject_compatibility_canvas "$oauth_code"
-  reject_compatibility_canvas "$dark_runtime"
-  reject_compatibility_canvas "$landscape_runtime"
-  expect_landscape_orientation "$landscape_runtime"
-  reject_compatibility_canvas "$tour_chat"
-  reject_compatibility_canvas "$first_video_frame"
-  .tools/verify-image-appearance "$iphone_plus_dark" dark
+  expect_dimensions "$iphone_plus" "1242x2208" &&
+  expect_dimensions "$iphone_plus_dark" "1242x2208" &&
+  expect_dimensions "$iphone_plus_landscape" "2208x1242" &&
+  expect_dimensions "$compact" "960x1704" &&
+  reject_compatibility_canvas "$oauth_code" &&
+  reject_compatibility_canvas "$dark_runtime" &&
+  reject_compatibility_canvas "$landscape_runtime" &&
+  expect_landscape_orientation "$landscape_runtime" &&
+  reject_compatibility_canvas "$tour_chat" &&
+  reject_compatibility_canvas "$first_video_frame" &&
+  .tools/verify-image-appearance "$iphone_plus_dark" dark &&
+  .tools/verify-image-appearance "$dark_runtime" dark &&
+  .tools/verify-image-appearance "$iphone_plus_landscape" no-black-bars &&
   .tools/verify-image-appearance "$landscape_runtime" no-black-bars
 } | tee .artifacts/logs/visual-geometry.log

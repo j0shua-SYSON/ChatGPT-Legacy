@@ -37,6 +37,7 @@ final class AppModel: ObservableObject {
     private let chatService: OpenAIChatService
     private let defaults: UserDefaults
     private let isUITesting: Bool
+    private let uiTestDelaysFirstToken: Bool
     private var didBootstrap = false
     private var loginTask: Task<Void, Never>?
     private var loginID: UUID?
@@ -59,6 +60,9 @@ final class AppModel: ObservableObject {
         self.settings = settings
         self.defaults = defaults
         isUITesting = runningUITests
+        uiTestDelaysFirstToken = ProcessInfo.processInfo.arguments.contains(
+            "-uiTestDelayFirstToken"
+        )
 
         let loaded = runningUITests ? [] : ((try? repository.load()) ?? [])
         let initial = loaded.isEmpty ? [ChatConversation()] : loaded
@@ -673,11 +677,14 @@ final class AppModel: ObservableObject {
         ]
         generationTask = Task { [weak self] in
             guard let self else { return }
-            for chunk in chunks {
+            for (index, chunk) in chunks.enumerated() {
                 if Task.isCancelled || generationID != requestID { return }
                 // Keep the deterministic stream observable long enough for UI
                 // automation and video evidence to exercise the Stop state.
-                try? await Task.sleep(nanoseconds: 750_000_000)
+                let delay: UInt64 = index == 0 && uiTestDelaysFirstToken
+                    ? 4_000_000_000
+                    : 750_000_000
+                try? await Task.sleep(nanoseconds: delay)
                 if Task.isCancelled || generationID != requestID { return }
                 mutateConversation(conversationID) { conversation in
                     guard let index = conversation.messages.firstIndex(

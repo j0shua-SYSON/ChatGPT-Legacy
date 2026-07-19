@@ -29,6 +29,13 @@ final class VisualLayoutTests: XCTestCase {
         attach(image, name: "chat-414x736-dark")
     }
 
+    func testPremiumChatRendersAtIPhone6sPlusLandscapeViewport() throws {
+        let image = try renderChat(size: CGSize(width: 736, height: 414), populated: true)
+        XCTAssertEqual(image.size, CGSize(width: 736, height: 414))
+        XCTAssertGreaterThan(try XCTUnwrap(image.pngData()).count, 20_000)
+        attach(image, name: "chat-736x414-light")
+    }
+
     private func renderChat(
         size: CGSize,
         populated: Bool,
