@@ -35,7 +35,7 @@ struct LoginView: View {
                     .tracking(1.5)
                     .foregroundColor(LegacyTheme.ink)
                 Text("NATIVE CLIENT · iOS 15")
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .font(LegacyTheme.utilitySmall)
                     .tracking(0.7)
                     .foregroundColor(LegacyTheme.muted)
             }
@@ -108,7 +108,7 @@ struct LoginView: View {
             VStack(alignment: .leading, spacing: 8) {
                 SectionLabel(text: "One-time code")
                 Text(authorization.userCode)
-                    .font(.system(size: 30, weight: .semibold, design: .monospaced))
+                    .font(LegacyTheme.authorizationCode)
                     .tracking(2.2)
                     .foregroundColor(LegacyTheme.ink)
                     .minimumScaleFactor(0.72)
@@ -147,6 +147,8 @@ struct LoginView: View {
                 Button("Cancel", action: model.cancelSignIn)
                     .font(.footnote.weight(.semibold))
                     .foregroundColor(LegacyTheme.warning)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
                     .accessibilityIdentifier("login.cancel")
             }
         }
@@ -224,12 +226,12 @@ struct LoginView: View {
     private var footer: some View {
         HStack {
             Text("UNOFFICIAL · OPEN SOURCE")
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .font(LegacyTheme.utilitySmall)
                 .tracking(1)
                 .foregroundColor(LegacyTheme.faint)
             Spacer()
             Text("1.0")
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .font(LegacyTheme.utilitySmall)
                 .foregroundColor(LegacyTheme.faint)
         }
     }

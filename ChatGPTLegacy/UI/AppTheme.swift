@@ -19,6 +19,8 @@ enum LegacyTheme {
     static let title = Font.system(.title3, design: .rounded).weight(.semibold)
     static let body = Font.system(.body, design: .default)
     static let utility = Font.system(.caption, design: .monospaced).weight(.medium)
+    static let utilitySmall = Font.system(.caption2, design: .monospaced).weight(.medium)
+    static let authorizationCode = Font.system(.title, design: .monospaced).weight(.semibold)
 
     private static func adaptive(light: UInt32, dark: UInt32) -> Color {
         Color(

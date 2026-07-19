@@ -47,35 +47,35 @@ struct ChatView: View {
             .accessibilityLabel("Conversation history")
             .accessibilityIdentifier("chat.history")
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(model.activeConversation?.title ?? "ChatGPT Legacy")
-                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundColor(LegacyTheme.ink)
-                    .lineLimit(1)
-
-                Menu {
-                    if model.pickerModels.isEmpty {
-                        Button("Refresh models", action: model.refreshModels)
-                    } else {
-                        ForEach(model.pickerModels) { item in
-                            Button {
-                                model.selectModel(item)
-                            } label: {
-                                if model.currentModel?.id == item.id {
-                                    Label(item.displayName, systemImage: "checkmark")
-                                } else {
-                                    Text(item.displayName)
-                                }
+            Menu {
+                if model.pickerModels.isEmpty {
+                    Button("Refresh models", action: model.refreshModels)
+                } else {
+                    ForEach(model.pickerModels) { item in
+                        Button {
+                            model.selectModel(item)
+                        } label: {
+                            if model.currentModel?.id == item.id {
+                                Label(item.displayName, systemImage: "checkmark")
+                            } else {
+                                Text(item.displayName)
                             }
                         }
                     }
-                } label: {
+                }
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(model.activeConversation?.title ?? "ChatGPT Legacy")
+                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                        .foregroundColor(LegacyTheme.ink)
+                        .lineLimit(1)
+
                     HStack(spacing: 4) {
                         if model.isLoadingModels {
                             ProgressView().scaleEffect(0.55)
                         }
                         Text(model.currentModel?.displayName ?? "No model")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .font(LegacyTheme.utilitySmall)
                             .foregroundColor(LegacyTheme.signal)
                             .lineLimit(1)
                         Image(systemName: "chevron.down")
@@ -83,9 +83,11 @@ struct ChatView: View {
                             .foregroundColor(LegacyTheme.signal)
                     }
                 }
-                .accessibilityLabel("Select model")
-                .accessibilityIdentifier("chat.modelPicker")
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
             }
+            .accessibilityLabel("Select model")
+            .accessibilityIdentifier("chat.modelPicker")
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Menu {
@@ -203,8 +205,9 @@ struct ChatView: View {
                     Button(action: model.cancelEditing) {
                         Image(systemName: "xmark")
                             .font(.caption.bold())
-                            .frame(width: 30, height: 30)
+                            .frame(width: 44, height: 44)
                     }
+                    .contentShape(Rectangle())
                     .accessibilityLabel("Cancel editing")
                 }
                 .padding(.horizontal, 16)
@@ -238,7 +241,7 @@ struct ChatView: View {
                     Image(systemName: "plus")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(LegacyTheme.ink)
-                        .frame(width: 42, height: 42)
+                        .frame(width: 44, height: 44)
                         .background(Circle().fill(LegacyTheme.canvas))
                 }
                 .accessibilityLabel("Add to message")
@@ -282,7 +285,7 @@ struct ChatView: View {
                         .foregroundColor(
                             speech.isRecording ? LegacyTheme.userText : LegacyTheme.ink
                         )
-                        .frame(width: 42, height: 42)
+                        .frame(width: 44, height: 44)
                         .background(
                             Circle().fill(
                                 speech.isRecording ? LegacyTheme.signal : LegacyTheme.canvas
@@ -339,6 +342,8 @@ struct ChatView: View {
                                 .frame(width: 22, height: 22)
                                 .background(Circle().fill(Color.black.opacity(0.72)))
                         }
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                         .offset(x: 5, y: -5)
                         .accessibilityLabel("Remove attached image")
                     }

@@ -91,6 +91,8 @@ struct HistoryView: View {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(LegacyTheme.faint)
                 }
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
                 .accessibilityLabel("Clear search")
             }
         }
@@ -180,7 +182,7 @@ struct HistoryView: View {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(LegacyTheme.muted)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
             .accessibilityLabel("Actions for \(conversation.title)")
@@ -229,6 +231,8 @@ struct HistoryView: View {
                     }
                     .font(.footnote.weight(.semibold))
                     .foregroundColor(LegacyTheme.warning)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
                     .accessibilityIdentifier("history.signOut")
                 }
             }

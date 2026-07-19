@@ -113,10 +113,11 @@ must use ChatGPT/Codex OAuth rather than an OpenAI API key.
   composer, message actions, history/account management, settings, and presets.
 - `ChatGPTLegacyTests/`: OAuth migration, SSE, Responses payload, persistence,
   image processing, and exact 414x736/320x568 render tests.
-- `ChatGPTLegacyUITests/`: ten deterministic flows with retained screenshots,
+- `ChatGPTLegacyUITests/`: fifteen deterministic flows with retained screenshots,
   including OAuth-code, dark-mode, landscape, premium-tour, and accessibility
   coverage plus Stop/immediate-resend task isolation and XCTest's complete
-  automated accessibility audit across three primary surfaces.
+  automated accessibility audit across welcome, device-code, chat, history,
+  prompt-library, and response-settings surfaces.
 - `project.yml` plus `Info.plist` and asset catalogs: iOS 15 iPhone-only XcodeGen
   project, permissions, adaptive launch color, and a generated opaque app icon.
 - `.github/workflows/ci.yml` and `scripts/ci/`: workspace-local XcodeGen,
@@ -293,3 +294,11 @@ unit/UI tests green before release.
   first-token delay. It can therefore verify both removal of a genuinely empty
   placeholder and operation-identity isolation for the immediate replacement,
   without weakening production cancellation behavior.
+- Run `29686336491` for commit `0963252` (2026-07-19) passed all 18
+  unit/render tests and 9 of 10 UI tests. The corrected Stop/immediate-resend
+  regression passed. XCTest's unfiltered accessibility audit then rejected the
+  signed-out eyebrow because its ten-point fixed font did not support Dynamic
+  Type; packaging was skipped. All visible text now uses semantic scalable
+  styles, compact controls expose at least 44-by-44-point hit regions, and the
+  audit is split into six independent surface tests so one early issue cannot
+  hide findings on chat, history, prompts, or settings.

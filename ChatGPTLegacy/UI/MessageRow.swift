@@ -35,7 +35,7 @@ struct MessageRow: View {
                         .tracking(1.2)
                     if isLast && isGenerating {
                         Text("STREAMING")
-                            .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                            .font(LegacyTheme.utilitySmall.weight(.semibold))
                             .tracking(0.8)
                             .foregroundColor(LegacyTheme.signal)
                     }
@@ -78,7 +78,7 @@ struct MessageRow: View {
                         )
                 }
                 Text("YOU")
-                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    .font(LegacyTheme.utilitySmall)
                     .tracking(1)
                     .foregroundColor(LegacyTheme.faint)
                     .padding(.trailing, 4)

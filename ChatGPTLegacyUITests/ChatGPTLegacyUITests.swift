@@ -205,7 +205,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
         XCTAssertTrue(app.buttons["composer.send"].waitForExistence(timeout: 8))
     }
 
-    func testPrimarySurfacesPassAutomatedAccessibilityAudit() throws {
+    func testSignedOutSurfacePassesAutomatedAccessibilityAudit() throws {
         guard #available(iOS 17.0, *) else {
             throw XCTSkip("XCTest accessibility audits require iOS 17 or later")
         }
@@ -213,15 +213,63 @@ final class ChatGPTLegacyUITests: XCTestCase {
         launch(arguments: ["-uiTesting"])
         XCTAssertTrue(app.buttons["login.continue"].waitForExistence(timeout: 5))
         try app.performAccessibilityAudit()
+    }
 
-        app.terminate()
+    func testOAuthDeviceCodeSurfacePassesAutomatedAccessibilityAudit() throws {
+        guard #available(iOS 17.0, *) else {
+            throw XCTSkip("XCTest accessibility audits require iOS 17 or later")
+        }
+
         launch(arguments: ["-uiTesting", "-uiTestDeviceCode"])
         XCTAssertTrue(app.staticTexts["login.code"].waitForExistence(timeout: 5))
         try app.performAccessibilityAudit()
+    }
 
-        app.terminate()
+    func testChatSurfacePassesAutomatedAccessibilityAudit() throws {
+        guard #available(iOS 17.0, *) else {
+            throw XCTSkip("XCTest accessibility audits require iOS 17 or later")
+        }
+
         launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+    }
+
+    func testHistorySurfacePassesAutomatedAccessibilityAudit() throws {
+        guard #available(iOS 17.0, *) else {
+            throw XCTSkip("XCTest accessibility audits require iOS 17 or later")
+        }
+
+        launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
+        XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
+        app.buttons["chat.history"].tap()
+        XCTAssertTrue(app.buttons["history.done"].waitForExistence(timeout: 3))
+        try app.performAccessibilityAudit()
+    }
+
+    func testPromptLibrarySurfacePassesAutomatedAccessibilityAudit() throws {
+        guard #available(iOS 17.0, *) else {
+            throw XCTSkip("XCTest accessibility audits require iOS 17 or later")
+        }
+
+        launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
+        XCTAssertTrue(app.buttons["chat.actions"].waitForExistence(timeout: 5))
+        app.buttons["chat.actions"].tap()
+        app.buttons["Prompt library"].tap()
+        XCTAssertTrue(app.buttons["prompts.cancel"].waitForExistence(timeout: 3))
+        try app.performAccessibilityAudit()
+    }
+
+    func testSettingsSurfacePassesAutomatedAccessibilityAudit() throws {
+        guard #available(iOS 17.0, *) else {
+            throw XCTSkip("XCTest accessibility audits require iOS 17 or later")
+        }
+
+        launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
+        XCTAssertTrue(app.buttons["chat.actions"].waitForExistence(timeout: 5))
+        app.buttons["chat.actions"].tap()
+        app.buttons["Response settings"].tap()
+        XCTAssertTrue(app.buttons["settings.done"].waitForExistence(timeout: 3))
         try app.performAccessibilityAudit()
     }
 

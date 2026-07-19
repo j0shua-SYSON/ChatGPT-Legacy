@@ -19,7 +19,8 @@ Every `main` push and version tag runs on a clean GitHub-hosted macOS runner:
    rename, stop-then-immediate-resend task isolation, all premium-tour sheets,
    dark mode, landscape, and accessibility-size control reachability. On the
    hosted iOS 26 simulator, XCTest's full automated accessibility audit must
-   also pass for signed-out, device-code, and populated-chat surfaces.
+   also pass independently for welcome, device-code, populated-chat, history,
+   prompt-library, and response-settings surfaces.
 6. Run the premium UI tour again while recording an H.264 MP4 bounded by
    in-app ready/finished markers, export every retained XCTest screenshot, and
    sample seven frames from the video. The track must be 8-65 seconds;

@@ -89,6 +89,8 @@ struct PromptLibraryView: View {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(LegacyTheme.faint)
                 }
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
                 .accessibilityLabel("Clear search")
             }
         }
@@ -139,6 +141,8 @@ struct PromptLibraryView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
                     .accessibilityIdentifier("prompts.category.\(category)")
                 }
             }
