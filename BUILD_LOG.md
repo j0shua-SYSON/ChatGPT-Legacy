@@ -177,3 +177,10 @@ hosted Xcode compile/test run is the next source-of-truth gate.
   the iOS 26.5 runner. Fix: select the closest preinstalled compatible iPhone
   simulator first; exact iPhone 6s Plus dimensions remain covered independently
   by the fixed 414x736 render test.
+- Run `29683008773` for commit `7cbb48f` (2026-07-19): selected and cold-booted
+  the preinstalled iPhone 17 Pro Max simulator; Xcode 26.5 compiled and analyzed
+  the complete app target for iOS 15 successfully. Test compilation then failed
+  because the spaced display product name inferred module `ChatGPT_Legacy` while
+  tests import target module `ChatGPTLegacy`. Fix: explicitly set
+  `PRODUCT_MODULE_NAME: ChatGPTLegacy`. The evidence upload is also changed to
+  include the hidden `.artifacts` tree so later diagnostics contain full logs.

@@ -103,6 +103,7 @@ jobs:
             !.artifacts/release/**
             ChatGPTLegacy.xcodeproj/**
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 30
 
       - name: Publish the tested tag as a GitHub Release
