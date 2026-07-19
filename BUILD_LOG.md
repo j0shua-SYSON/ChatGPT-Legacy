@@ -223,3 +223,8 @@ unit/UI tests green before release.
   the true 6s Plus render must be 1242x2208 pixels, the compact render must be
   960x1704, and neither the runtime tour screenshot nor sampled video frame may
   be the broken 960x1440 compatibility canvas seen in the rejected runs.
+- Run `29684223768` for commit `b6b5c16` (2026-07-19) stopped at the new
+  preflight gate in seconds. XcodeGen's `info:` generator had overwritten the
+  checked-in `Info.plist` and stripped `UILaunchStoryboardName` before the
+  validation command read it. The app target now uses an explicit
+  `INFOPLIST_FILE` build setting instead, leaving the reviewed plist untouched.

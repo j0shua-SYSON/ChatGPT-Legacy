@@ -56,13 +56,12 @@ targets:
       - path: ChatGPTLegacy
         excludes:
           - Resources/Info.plist
-    info:
-      path: ChatGPTLegacy/Resources/Info.plist
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.j0shuasyson.ChatGPTLegacy
         PRODUCT_NAME: ChatGPT Legacy
         PRODUCT_MODULE_NAME: ChatGPTLegacy
+        INFOPLIST_FILE: ChatGPTLegacy/Resources/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         CURRENT_PROJECT_VERSION: "1"
