@@ -538,6 +538,19 @@ final class AppModel: ObservableObject {
     }
 
     private func installUITestFixture() {
+        if ProcessInfo.processInfo.arguments.contains("-uiTestDeviceCode") {
+            authPhase = .waitingForBrowser(
+                DeviceAuthorization(
+                    verificationURL: OpenAIEndpoints.deviceVerification,
+                    userCode: "ABCD-EFGH",
+                    expiresAt: Date().addingTimeInterval(900),
+                    deviceAuthID: "ui-test-device-auth",
+                    pollInterval: 5
+                )
+            )
+            return
+        }
+
         guard ProcessInfo.processInfo.arguments.contains("-uiTestSignedIn") else {
             authPhase = .signedOut
             return

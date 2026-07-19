@@ -18,7 +18,22 @@ final class VisualLayoutTests: XCTestCase {
         attach(image, name: "chat-320x568-light")
     }
 
-    private func renderChat(size: CGSize, populated: Bool) throws -> UIImage {
+    func testPremiumChatRendersAtIPhone6sPlusViewportInDarkMode() throws {
+        let image = try renderChat(
+            size: CGSize(width: 414, height: 736),
+            populated: true,
+            style: .dark
+        )
+        XCTAssertEqual(image.size, CGSize(width: 414, height: 736))
+        XCTAssertGreaterThan(try XCTUnwrap(image.pngData()).count, 20_000)
+        attach(image, name: "chat-414x736-dark")
+    }
+
+    private func renderChat(
+        size: CGSize,
+        populated: Bool,
+        style: UIUserInterfaceStyle = .light
+    ) throws -> UIImage {
         let suite = try XCTUnwrap(UserDefaults(suiteName: "visual-\(UUID().uuidString)"))
         let repository = InMemoryConversationRepository()
         let model = AppModel(
@@ -32,6 +47,7 @@ final class VisualLayoutTests: XCTestCase {
             rootView: ChatView().environmentObject(model)
         )
         let window = UIWindow(frame: CGRect(origin: .zero, size: size))
+        window.overrideUserInterfaceStyle = style
         window.rootViewController = controller
         window.makeKeyAndVisible()
         controller.view.frame = window.bounds

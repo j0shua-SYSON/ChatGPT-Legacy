@@ -14,17 +14,21 @@ Every `main` push and version tag runs on a clean GitHub-hosted macOS runner:
    image downsampling, and fixed-size SwiftUI rendering.
 4. Render and retain 414x736-point (iPhone 6s Plus) and 320x568-point (compact
    legacy iPhone) screenshots inside XCTest.
-5. Run deterministic XCUITests covering signed-out trust disclosure, prompt
-   insertion, streaming/stop state, history search, rename, all premium-tour
-   sheets, and accessibility-size control reachability.
-6. Run the premium UI tour again while recording an H.264 MP4, export every
-   retained XCTest screenshot, and sample seven frames from the video.
+5. Run deterministic XCUITests covering signed-out trust disclosure, the OAuth
+   device-code state, prompt insertion, streaming/stop state, history search,
+   rename, all premium-tour sheets, dark mode, landscape, and accessibility-size
+   control reachability.
+6. Run the premium UI tour again while recording an H.264 MP4 bounded by
+   in-app ready/finished markers, export every retained XCTest screenshot, and
+   sample seven frames from the video. Home-screen/build-startup footage is not
+   accepted as tour evidence.
 7. Require the fixed iPhone 6s Plus render to be exactly 1242x2208 pixels and
    reject the 960x1440 (320x480 at 3x) compatibility canvas in both runtime
    screenshots and sampled video frames.
 8. Build the generic arm64 iOS Release app with signing disabled, add an ad-hoc
    signature, verify the signature and arm64 slice, package the IPA, test the ZIP,
-   inspect metadata/minimum OS, and generate SHA-256 digests.
+   require an iPhone-only `UIDeviceFamily`, inspect metadata/minimum OS, and
+   generate SHA-256 digests.
 
 The workflow prefers an iPhone 8 Plus simulator when a compatible runtime still
 exists, then falls back through 414-point and current iPhone device types. Exact

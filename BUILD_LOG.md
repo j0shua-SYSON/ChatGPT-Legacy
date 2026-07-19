@@ -112,8 +112,9 @@ must use ChatGPT/Codex OAuth rather than an OpenAI API key.
   composer, message actions, history/account management, settings, and presets.
 - `ChatGPTLegacyTests/`: OAuth migration, SSE, Responses payload, persistence,
   image processing, and exact 414x736/320x568 render tests.
-- `ChatGPTLegacyUITests/`: five deterministic flows with retained screenshots,
-  including a complete premium UI tour and accessibility text sizing.
+- `ChatGPTLegacyUITests/`: eight deterministic flows with retained screenshots,
+  including OAuth-code, dark-mode, landscape, premium-tour, and accessibility
+  coverage.
 - `project.yml` plus `Info.plist` and asset catalogs: iOS 15 iPhone-only XcodeGen
   project, permissions, adaptive launch color, and a generated opaque app icon.
 - `.github/workflows/ci.yml` and `scripts/ci/`: workspace-local XcodeGen,
@@ -130,8 +131,9 @@ unit/UI tests green before release.
 
 ## Current risks and items to verify
 
-- The app target compiles and passes the Xcode static analyzer on hosted Xcode
-  26.5. The next run must verify the timestamp and UI-identifier fixes.
+- The app target compiles, passes the Xcode static analyzer, and completed the
+  full unit/UI/package pipeline on hosted Xcode 26.5. The next run must verify
+  the iPhone-only metadata, clean bounded video, and expanded UI matrix.
 - Unit request-construction tests cover OAuth headers, FedRAMP routing, payloads,
   migration defaults, SSE, persistence, images, and exact fixture rendering.
 - The current public macOS runner may not support an iPhone 8 Plus device type;
@@ -144,9 +146,10 @@ unit/UI tests green before release.
 
 ## Next implementation steps
 
-1. Push the timestamp, native launch storyboard, and accessibility selector fixes.
-2. Iterate on GitHub Actions until green; download and inspect every retained
-   screenshot plus representative frames from the recorded UI tour.
+1. Push the iPhone-only, clean-video, dark/landscape/OAuth-code test changes and
+   iterate until the expanded source-of-truth workflow is green.
+2. Download and manually inspect every retained screenshot and every sampled
+   frame from the bounded tour video; reject any system overlay or bad geometry.
 3. Preserve the generated `.xcodeproj`, rerun the final source-of-truth gate, tag
    `v1.0.0`, verify the arm64 IPA/checksums/evidence, and publish the release.
 
@@ -228,3 +231,23 @@ unit/UI tests green before release.
   checked-in `Info.plist` and stripped `UILaunchStoryboardName` before the
   validation command read it. The app target now uses an explicit
   `INFOPLIST_FILE` build setting instead, leaving the reviewed plist untouched.
+- Run `29684261077` for commit `dfcafa6` (2026-07-19) is the first complete green
+  native-layout run: Xcode 26.5 static analysis passed, all 16 unit tests and all
+  5 UI tests passed, the generic arm64/iOS 15 app built and verified under ad-hoc
+  signing, and all evidence/release artifacts uploaded. The exact visual gates
+  passed at 1242x2208 for the iPhone 6s Plus fixture, 960x1704 for the compact
+  fixture, and 1320x2868 for runtime screenshots/video.
+- Manual review of every visual state confirmed that the prior black-barred
+  960x1440 compatibility canvas is gone. It also rejected two otherwise-green
+  artifacts before release: Apple's first-run keyboard tutorial appeared over
+  one composer capture, and the raw tour video spent its build startup/cleanup
+  on the simulator Home Screen. UI automation now dismisses that tutorial, and
+  the recorder is bounded by explicit ready/finished markers emitted while the
+  tested app is on screen.
+- Release inspection for run `29684261077` found a second metadata defect before
+  tagging: XcodeGen's application-target default overrode the project-level
+  iPhone family and emitted `UIDeviceFamily=[1,2]`, along with unused iPad icon
+  warnings. The application target now explicitly sets family `1`, and package
+  verification fails if the built plist contains anything except iPhone. The
+  next hosted run also adds deterministic OAuth device-code, dark-mode,
+  landscape, and 414x736 dark rendering coverage.

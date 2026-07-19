@@ -15,7 +15,11 @@ try FileManager.default.createDirectory(
 )
 
 let asset = AVURLAsset(url: videoURL)
-let duration = CMTimeGetSeconds(asset.duration)
+guard let videoTrack = asset.tracks(withMediaType: .video).first else {
+    fputs("video has no video track\n", stderr)
+    exit(3)
+}
+let duration = CMTimeGetSeconds(videoTrack.timeRange.duration)
 guard duration.isFinite, duration > 0 else {
     fputs("video has no readable duration\n", stderr)
     exit(3)

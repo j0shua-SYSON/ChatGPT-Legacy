@@ -32,6 +32,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
         let composer = app.textViews["composer.text"]
         XCTAssertTrue(composer.waitForExistence(timeout: 2))
         XCTAssertTrue((composer.value as? String)?.contains("first principles") == true)
+        dismissKeyboardTutorialIfNeeded()
         capture("empty-preset-filled")
 
         app.buttons["composer.send"].tap()
@@ -72,6 +73,8 @@ final class ChatGPTLegacyUITests: XCTestCase {
         launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
 
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
+        signalVideoTour("READY")
+        pauseForVideo(2.0)
         capture("tour-01-chat")
         pauseForVideo()
 
@@ -87,6 +90,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
         capture("tour-03-prompts")
         pauseForVideo()
         app.buttons["prompts.item.decide"].tap()
+        dismissKeyboardTutorialIfNeeded()
 
         let composer = app.textViews["composer.text"]
         XCTAssertTrue(composer.waitForExistence(timeout: 3))
@@ -105,6 +109,8 @@ final class ChatGPTLegacyUITests: XCTestCase {
         app.buttons["settings.done"].tap()
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 3))
         capture("tour-07-finished")
+        pauseForVideo(1.0)
+        signalVideoTour("FINISHED")
     }
 
     func testAccessibilityTextSizeKeepsPrimaryControlsReachable() {
@@ -123,6 +129,47 @@ final class ChatGPTLegacyUITests: XCTestCase {
         capture("accessibility-medium")
     }
 
+    func testOAuthDeviceCodeScreenFitsAndKeepsActionsReachable() {
+        launch(arguments: ["-uiTesting", "-uiTestDeviceCode"])
+
+        XCTAssertTrue(app.staticTexts["login.code"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["login.code"].label, "ABCD-EFGH")
+        XCTAssertTrue(app.buttons["login.open"].isHittable)
+        XCTAssertTrue(app.buttons["login.cancel"].isHittable)
+        capture("oauth-device-code")
+    }
+
+    func testDarkModeKeepsPremiumChatReadableAndReachable() {
+        launch(
+            arguments: [
+                "-uiTesting", "-uiTestSignedIn", "-uiTestPopulated",
+                "-AppleInterfaceStyle", "Dark"
+            ]
+        )
+
+        XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["chat.history"].isHittable)
+        XCTAssertTrue(app.buttons["composer.add"].isHittable)
+        XCTAssertGreaterThanOrEqual(
+            app.otherElements.matching(identifier: "message.assistant").count,
+            1
+        )
+        capture("chat-dark")
+    }
+
+    func testLandscapeKeepsNavigationAndComposerReachable() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
+
+        XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["chat.history"].isHittable)
+        XCTAssertTrue(app.buttons["chat.actions"].isHittable)
+        XCTAssertTrue(app.buttons["composer.add"].isHittable)
+        XCTAssertTrue(app.textViews["composer.text"].isHittable)
+        capture("chat-landscape")
+    }
+
     private func launch(arguments: [String]) {
         app.launchArguments = arguments
         app.launchEnvironment["UITEST_DISABLE_ANIMATIONS"] = "0"
@@ -136,8 +183,21 @@ final class ChatGPTLegacyUITests: XCTestCase {
         add(attachment)
     }
 
-    private func pauseForVideo() {
-        RunLoop.current.run(until: Date().addingTimeInterval(0.55))
+    private func dismissKeyboardTutorialIfNeeded() {
+        let tutorialContinue = app.buttons["Continue"]
+        if tutorialContinue.waitForExistence(timeout: 1) {
+            tutorialContinue.tap()
+            XCTAssertTrue(tutorialContinue.waitForNonExistence(timeout: 2))
+        }
+    }
+
+    private func pauseForVideo(_ duration: TimeInterval = 0.55) {
+        RunLoop.current.run(until: Date().addingTimeInterval(duration))
+    }
+
+    private func signalVideoTour(_ state: String) {
+        let marker = "CHATGPT_LEGACY_VIDEO_\(state)\n"
+        FileHandle.standardError.write(Data(marker.utf8))
     }
 }
 

@@ -58,6 +58,15 @@ if [[ -n "$DSYM" && -d "$DSYM" ]]; then
 fi
 
 EXECUTABLE="$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")"
+DEVICE_FAMILY="$(/usr/libexec/PlistBuddy -c 'Print :UIDeviceFamily:0' "$APP/Info.plist")"
+if [[ "$DEVICE_FAMILY" != "1" ]]; then
+  echo "Release must target iPhone only; found UIDeviceFamily[0]=$DEVICE_FAMILY." >&2
+  exit 1
+fi
+if /usr/libexec/PlistBuddy -c 'Print :UIDeviceFamily:1' "$APP/Info.plist" >/dev/null 2>&1; then
+  echo "Release unexpectedly contains a second UIDeviceFamily entry." >&2
+  exit 1
+fi
 {
   echo "ChatGPT Legacy v$VERSION release evidence"
   echo "Built: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
@@ -72,6 +81,8 @@ EXECUTABLE="$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/
   echo
   echo "Architectures:"
   lipo -archs "$EXECUTABLE"
+  echo
+  echo "Device family: iPhone only ($DEVICE_FAMILY)"
   echo
   echo "Minimum OS load command:"
   otool -l "$EXECUTABLE" | awk '/LC_BUILD_VERSION/{show=1;count=0} show{print;count++} count==6{show=0}'
