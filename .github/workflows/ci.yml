@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           .tools/xcodegen-dist/xcodegen/bin/xcodegen generate
           plutil -lint ChatGPTLegacy/Resources/Info.plist
-          plutil -lint ChatGPTLegacy/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json
+          jq empty ChatGPTLegacy/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json
           xcodebuild -version | tee .artifacts/logs/xcode-version.log
           xcodebuild -project ChatGPTLegacy.xcodeproj -list | tee .artifacts/logs/project-list.log
 

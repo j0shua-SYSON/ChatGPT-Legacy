@@ -159,3 +159,11 @@ hosted Xcode compile/test run is the next source-of-truth gate.
   home was changed.
 - Never record access tokens, refresh tokens, ID tokens, device-auth IDs, GitHub
   tokens, or user credentials in this log, source, CI output, or release assets.
+
+## Hosted run history
+
+- Run `29682765640` for commit `5a381af` (2026-07-19): XcodeGen 2.46.0
+  downloaded inside the runner workspace and generated `ChatGPTLegacy.xcodeproj`
+  successfully. The validation step then failed before compilation because
+  macOS `plutil -lint` rejected the JSON app-icon manifest. Fix: validate the
+  asset JSON with `jq empty`; no app source change was required.
