@@ -172,3 +172,8 @@ hosted Xcode compile/test run is the next source-of-truth gate.
   simulator step failed before compilation because failed `simctl create` output
   for iPhone 8 Plus was mistaken for a UUID. Fix: require a UUID-shaped success
   result and fall back across every available iPhone device type for iOS 26.5.
+- Run `29682893582` for commit `6f5af68` (2026-07-19): cancelled during the
+  simulator-preparation step after historical create probes were still slow on
+  the iOS 26.5 runner. Fix: select the closest preinstalled compatible iPhone
+  simulator first; exact iPhone 6s Plus dimensions remain covered independently
+  by the fixed 414x736 render test.

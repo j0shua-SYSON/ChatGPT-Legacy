@@ -5,70 +5,62 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 mkdir -p .artifacts/logs
 
-RUNTIMES=()
-while IFS= read -r runtime; do
-  RUNTIMES+=("$runtime")
-done < <(
-  xcrun simctl list runtimes --json |
-    jq -r '.runtimes | map(select(.isAvailable and (.identifier | contains("iOS")))) | sort_by(.version | split(".") | map(tonumber)) | reverse | .[].identifier'
+xcrun simctl list devices available --json > .artifacts/sim-devices.json
+
+PREFERRED_NAMES=(
+  "iPhone 8 Plus"
+  "iPhone 11 Pro Max"
+  "iPhone 14 Plus"
+  "iPhone 17 Pro Max"
+  "iPhone 17 Pro"
+  "iPhone 17"
+  "iPhone Air"
+  "iPhone 16 Pro Max"
+  "iPhone 16 Plus"
+  "iPhone 16 Pro"
+  "iPhone 16e"
+  "iPhone 15 Pro"
 )
 
-if [[ ${#RUNTIMES[@]} -eq 0 ]]; then
-  echo "No available iOS Simulator runtime." >&2
-  exit 1
-fi
-
-PREFERRED_TYPES=(
-  com.apple.CoreSimulator.SimDeviceType.iPhone-8-Plus
-  com.apple.CoreSimulator.SimDeviceType.iPhone-11-Pro-Max
-  com.apple.CoreSimulator.SimDeviceType.iPhone-14-Plus
-  com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro-Max
-  com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro
-  com.apple.CoreSimulator.SimDeviceType.iPhone-17
-  com.apple.CoreSimulator.SimDeviceType.iPhone-Air
-  com.apple.CoreSimulator.SimDeviceType.iPhone-16-Plus
-  com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro
-  com.apple.CoreSimulator.SimDeviceType.iPhone-16e
-  com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro
-)
-
-xcrun simctl list devicetypes --json > .artifacts/sim-device-types.json
-while IFS= read -r type; do
-  PREFERRED_TYPES+=("$type")
-done < <(
-  jq -r '.devicetypes[] | select(.name | startswith("iPhone")) | .identifier' \
-    .artifacts/sim-device-types.json | sort -r
-)
-
-SIM_ID=""
-SIM_TYPE=""
-SIM_RUNTIME=""
-: > .artifacts/logs/simulator-create.log
-for type in "${PREFERRED_TYPES[@]}"; do
-  if ! jq -e --arg id "$type" '.devicetypes[] | select(.identifier == $id)' \
-    .artifacts/sim-device-types.json >/dev/null; then
-    continue
-  fi
-  for runtime in "${RUNTIMES[@]}"; do
-    candidate="$(xcrun simctl create "ChatGPT Legacy CI" "$type" "$runtime" 2>&1 || true)"
-    if [[ "$candidate" =~ ^[0-9A-Fa-f-]{36}$ ]]; then
-      SIM_ID="$candidate"
-      SIM_TYPE="$type"
-      SIM_RUNTIME="$runtime"
-      break 2
-    fi
-    printf '%s / %s: %s\n' "$type" "$runtime" "$candidate" \
-      >> .artifacts/logs/simulator-create.log
-  done
+selection=""
+for name in "${PREFERRED_NAMES[@]}"; do
+  selection="$(
+    jq -r --arg name "$name" '
+      [
+        .devices | to_entries[] | .key as $runtime | .value[] |
+        select(.isAvailable and .name == $name) |
+        [.udid, .deviceTypeIdentifier, $runtime, .name]
+      ][0] | if . == null then empty else @tsv end
+    ' .artifacts/sim-devices.json
+  )"
+  [[ -n "$selection" ]] && break
 done
 
-if [[ -z "$SIM_ID" ]]; then
-  echo "Could not create a compatible iPhone simulator." >&2
-  cat .artifacts/logs/simulator-create.log >&2
+if [[ -z "$selection" ]]; then
+  selection="$(
+    jq -r '
+      [
+        .devices | to_entries[] | .key as $runtime | .value[] |
+        select(.isAvailable and (.name | startswith("iPhone"))) |
+        [.udid, .deviceTypeIdentifier, $runtime, .name]
+      ][0] | if . == null then empty else @tsv end
+    ' .artifacts/sim-devices.json
+  )"
+fi
+
+if [[ -z "$selection" ]]; then
+  echo "No preinstalled iPhone simulator is available." >&2
+  xcrun simctl list devices available >&2
   exit 1
 fi
 
-xcrun simctl boot "$SIM_ID"
+IFS=$'\t' read -r SIM_ID SIM_TYPE SIM_RUNTIME SIM_NAME <<< "$selection"
+if [[ ! "$SIM_ID" =~ ^[0-9A-Fa-f-]{36}$ ]]; then
+  echo "Simulator selection returned an invalid UUID: $SIM_ID" >&2
+  exit 1
+fi
+
+xcrun simctl boot "$SIM_ID" 2>/dev/null || true
 xcrun simctl bootstatus "$SIM_ID" -b
 xcrun simctl status_bar "$SIM_ID" override \
   --time "9:41" --batteryState charged --batteryLevel 100 \
@@ -82,6 +74,7 @@ EOF
 
 {
   echo "Simulator ID: $SIM_ID"
+  echo "Device: $SIM_NAME"
   echo "Device type: $SIM_TYPE"
   echo "Runtime: $SIM_RUNTIME"
   xcrun simctl list devices | grep -F "$SIM_ID" || true
