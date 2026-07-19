@@ -325,3 +325,23 @@ unit/UI tests green before release.
   light-theme secondary colors exceed 4.5:1 with margin, prompt badges use
   decorative symbols, text views expose real labels/hints, and search prompts
   are shorter inside flexible-height fields. No audit category is filtered.
+- Run `29687949454` for commit `de9a008` (2026-07-19) confirmed the broad
+  reflow pass worked: all 19 unit/render tests passed, all nine functional UI
+  flows passed, and both the signed-out and OAuth device-code surfaces passed
+  their unfiltered accessibility audits. The six-surface audit set reduced from
+  56 findings to 15: chat 2, history 3, prompt library 8, settings 2, OAuth 0,
+  and signed-out 0. The exact 414x736 Accessibility Medium render was manually
+  inspected at 1242x2208 and remained sharp, full-canvas, readable, and usable;
+  the header reflowed to two lines while the composer and primary actions stayed
+  visible. Packaging remained correctly withheld because four surfaces were not
+  yet audit-clean.
+- The final 15 findings were traced to rigid presentation patterns, not hidden
+  feature failures: caption-two utility tokens, concatenated history metadata,
+  single-line search placeholders, lazy prompt-card recycling while the audit
+  changes Dynamic Type, and wide tracked uppercase section labels. Utility text
+  now uses the semantic caption style, history count and relative time use
+  separate reflowable lines, visual search prompts are accessibility-hidden
+  overlays over empty labeled fields, the eight-item prompt library uses a
+  regular stack, and section labels use readable title case with restrained
+  tracking. These changes are awaiting the next hosted source-of-truth run; no
+  audit type has been suppressed or broadly filtered.

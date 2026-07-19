@@ -75,7 +75,7 @@ struct ChatView: View {
                             ProgressView().scaleEffect(0.55)
                         }
                         Text(model.currentModel?.displayName ?? "No model")
-                            .font(LegacyTheme.utilitySmall)
+                            .font(LegacyTheme.utility)
                             .foregroundColor(LegacyTheme.signal)
                             .fixedSize(horizontal: false, vertical: true)
                         Image(systemName: "chevron.down")

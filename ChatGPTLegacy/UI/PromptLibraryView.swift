@@ -16,7 +16,10 @@ struct PromptLibraryView: View {
                 searchField
                 categoryStrip
                 ScrollView {
-                    LazyVStack(spacing: 10) {
+                    // This library is intentionally small. Keeping every card in a
+                    // regular stack lets Dynamic Type reflow the full surface while
+                    // accessibility tooling changes the user's preferred text size.
+                    VStack(spacing: 10) {
                         ForEach(filteredPresets) { preset in
                             Button {
                                 onSelect(preset)
@@ -75,6 +78,9 @@ struct PromptLibraryView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
+                            .font(.body.weight(.semibold))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                         .accessibilityLabel("Close prompt library")
                         .accessibilityIdentifier("prompts.cancel")
@@ -88,9 +94,19 @@ struct PromptLibraryView: View {
         HStack(spacing: 9) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(LegacyTheme.muted)
-            TextField("Search prompts", text: $searchText)
-                .accessibilityLabel("Search prompt library")
-                .accessibilityIdentifier("prompts.search")
+            ZStack(alignment: .leading) {
+                if searchText.isEmpty {
+                    Text("Search")
+                        .font(.body)
+                        .foregroundColor(LegacyTheme.faint)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityHidden(true)
+                }
+                TextField("", text: $searchText)
+                    .accessibilityLabel("Search prompt library")
+                    .accessibilityHint("Enter words from a saved prompt")
+                    .accessibilityIdentifier("prompts.search")
+            }
             if !searchText.isEmpty {
                 Button {
                     searchText = ""

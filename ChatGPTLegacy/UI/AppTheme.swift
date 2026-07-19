@@ -19,7 +19,6 @@ enum LegacyTheme {
     static let title = Font.system(.title3, design: .rounded).weight(.semibold)
     static let body = Font.system(.body, design: .default)
     static let utility = Font.caption.weight(.semibold)
-    static let utilitySmall = Font.caption2.weight(.medium)
     static let authorizationCode = Font.system(.title, design: .monospaced).weight(.semibold)
 
     private static func adaptive(light: UInt32, dark: UInt32) -> Color {
@@ -133,10 +132,11 @@ struct SectionLabel: View {
     let text: String
 
     var body: some View {
-        Text(text.uppercased())
+        Text(text)
             .font(LegacyTheme.utility)
-            .tracking(1.4)
+            .tracking(0.35)
             .foregroundColor(LegacyTheme.muted)
+            .layoutPriority(1)
             .fixedSize(horizontal: false, vertical: true)
     }
 }

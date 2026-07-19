@@ -79,15 +79,25 @@ struct HistoryView: View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(LegacyTheme.muted)
-            TextField("Search conversations", text: $searchText)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-                .focused($searchFocused)
-                .submitLabel(.done)
-                .onSubmit { searchFocused = false }
-                .foregroundColor(LegacyTheme.ink)
-                .accessibilityLabel("Search conversation titles and messages")
-                .accessibilityIdentifier("history.search")
+            ZStack(alignment: .leading) {
+                if searchText.isEmpty {
+                    Text("Search")
+                        .font(.body)
+                        .foregroundColor(LegacyTheme.faint)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityHidden(true)
+                }
+                TextField("", text: $searchText)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .focused($searchFocused)
+                    .submitLabel(.done)
+                    .onSubmit { searchFocused = false }
+                    .foregroundColor(LegacyTheme.ink)
+                    .accessibilityLabel("Search conversation titles and messages")
+                    .accessibilityHint("Enter words from a conversation")
+                    .accessibilityIdentifier("history.search")
+            }
             if !searchText.isEmpty {
                 Button {
                     searchText = ""
@@ -143,13 +153,13 @@ struct HistoryView: View {
                             .font(.subheadline.weight(.semibold))
                             .foregroundColor(LegacyTheme.ink)
                             .fixedSize(horizontal: false, vertical: true)
-                        (
-                            Text("\(conversation.messages.count) messages · ") +
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("\(conversation.messages.count) messages")
                             Text(conversation.updatedAt, style: .relative)
-                        )
-                            .font(.caption)
-                            .foregroundColor(LegacyTheme.muted)
-                            .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .font(.caption)
+                        .foregroundColor(LegacyTheme.muted)
+                        .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 4)
                 }
