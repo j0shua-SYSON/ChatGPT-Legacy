@@ -113,7 +113,7 @@ final class SpeechTranscriber: ObservableObject {
                 guard let self else { return }
                 switch status {
                 case .authorized:
-                    self.start()
+                    self.requestMicrophonePermissionAndStart()
                 case .denied:
                     self.errorMessage = "Enable Speech Recognition in Settings to use dictation."
                 case .restricted:
@@ -124,6 +124,30 @@ final class SpeechTranscriber: ObservableObject {
                     self.errorMessage = "Speech Recognition is unavailable."
                 }
             }
+        }
+    }
+
+    private func requestMicrophonePermissionAndStart() {
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized:
+            start()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    if granted {
+                        self.start()
+                    } else {
+                        self.errorMessage = "Enable Microphone access in Settings to use dictation."
+                    }
+                }
+            }
+        case .denied:
+            errorMessage = "Enable Microphone access in Settings to use dictation."
+        case .restricted:
+            errorMessage = "Microphone access is restricted on this device."
+        @unknown default:
+            errorMessage = "Microphone access is unavailable."
         }
     }
 

@@ -43,12 +43,16 @@ final class VisualLayoutTests: XCTestCase {
         )
         model.configureForVisualTesting(populated: populated)
 
+        let colorScheme: ColorScheme = style == .dark ? .dark : .light
         let controller = UIHostingController(
-            rootView: ChatView().environmentObject(model)
+            rootView: ChatView()
+                .environmentObject(model)
+                .environment(\.colorScheme, colorScheme)
         )
+        controller.overrideUserInterfaceStyle = style
         let window = UIWindow(frame: CGRect(origin: .zero, size: size))
-        window.overrideUserInterfaceStyle = style
         window.rootViewController = controller
+        window.overrideUserInterfaceStyle = style
         window.makeKeyAndVisible()
         controller.view.frame = window.bounds
         controller.view.setNeedsLayout()

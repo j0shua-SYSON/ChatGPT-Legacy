@@ -74,7 +74,10 @@ final class ChatGPTLegacyUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
         signalVideoTour("READY")
-        pauseForVideo(2.0)
+        // simctl can need several seconds before it emits its first encoded
+        // frame. Hold the opening chat so the released tour starts in-app at
+        // the beginning instead of joining midway through the menu sequence.
+        pauseForVideo(6.0)
         capture("tour-01-chat")
         pauseForVideo()
 
@@ -140,12 +143,8 @@ final class ChatGPTLegacyUITests: XCTestCase {
     }
 
     func testDarkModeKeepsPremiumChatReadableAndReachable() {
-        launch(
-            arguments: [
-                "-uiTesting", "-uiTestSignedIn", "-uiTestPopulated",
-                "-AppleInterfaceStyle", "Dark"
-            ]
-        )
+        app.launchEnvironment["UITEST_COLOR_SCHEME"] = "dark"
+        launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
 
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["chat.history"].isHittable)
@@ -158,16 +157,48 @@ final class ChatGPTLegacyUITests: XCTestCase {
     }
 
     func testLandscapeKeepsNavigationAndComposerReachable() {
-        XCUIDevice.shared.orientation = .landscapeLeft
         defer { XCUIDevice.shared.orientation = .portrait }
         launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
 
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
+        XCUIDevice.shared.orientation = .landscapeLeft
+        XCTAssertTrue(waitForLandscape(timeout: 5))
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+        _ = app.screenshot()
+        RunLoop.current.run(until: Date().addingTimeInterval(0.4))
         XCTAssertTrue(app.buttons["chat.history"].isHittable)
         XCTAssertTrue(app.buttons["chat.actions"].isHittable)
         XCTAssertTrue(app.buttons["composer.add"].isHittable)
         XCTAssertTrue(app.textViews["composer.text"].isHittable)
         capture("chat-landscape")
+    }
+
+    func testStopThenImmediateResendKeepsReplacementStreamActive() {
+        launch(arguments: ["-uiTesting", "-uiTestSignedIn"])
+
+        let composer = app.textViews["composer.text"]
+        XCTAssertTrue(composer.waitForExistence(timeout: 5))
+        composer.tap()
+        dismissKeyboardTutorialIfNeeded()
+        composer.typeText("First request")
+        app.buttons["composer.send"].tap()
+
+        let stop = app.buttons["composer.stop"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 2))
+        stop.tap()
+        XCTAssertTrue(app.buttons["composer.send"].waitForExistence(timeout: 2))
+        XCTAssertTrue(
+            app.otherElements["message.assistant"].waitForNonExistence(timeout: 2),
+            "Stopping before the first token must not leave a blank response"
+        )
+
+        composer.tap()
+        composer.typeText("Replacement request")
+        app.buttons["composer.send"].tap()
+        XCTAssertTrue(stop.waitForExistence(timeout: 2))
+        RunLoop.current.run(until: Date().addingTimeInterval(0.4))
+        XCTAssertTrue(stop.exists, "The cancelled task must not clear the replacement stream")
+        XCTAssertTrue(app.buttons["composer.send"].waitForExistence(timeout: 5))
     }
 
     private func launch(arguments: [String]) {
@@ -189,6 +220,16 @@ final class ChatGPTLegacyUITests: XCTestCase {
             tutorialContinue.tap()
             XCTAssertTrue(tutorialContinue.waitForNonExistence(timeout: 2))
         }
+    }
+
+    private func waitForLandscape(timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            let frame = app.windows.firstMatch.frame
+            if frame.width > frame.height { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        } while Date() < deadline
+        return false
     }
 
     private func pauseForVideo(_ duration: TimeInterval = 0.55) {

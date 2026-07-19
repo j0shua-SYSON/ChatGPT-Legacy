@@ -39,7 +39,11 @@ final class AppModel: ObservableObject {
     private let isUITesting: Bool
     private var didBootstrap = false
     private var loginTask: Task<Void, Never>?
+    private var loginID: UUID?
     private var generationTask: Task<Void, Never>?
+    private var generationID: UUID?
+    private var generationAssistantID: UUID?
+    private var generationConversationID: UUID?
 
     init(
         repository: ConversationPersisting = ConversationRepository(),
@@ -120,6 +124,8 @@ final class AppModel: ObservableObject {
 
     func beginSignIn() {
         loginTask?.cancel()
+        let requestID = UUID()
+        loginID = requestID
         errorMessage = nil
         authPhase = .requestingCode
 
@@ -128,15 +134,26 @@ final class AppModel: ObservableObject {
             do {
                 let authorization = try await authService.beginDeviceAuthorization()
                 try Task.checkCancellation()
+                guard loginID == requestID else { return }
                 authPhase = .waitingForBrowser(authorization)
                 let tokens = try await authService.completeDeviceAuthorization(authorization)
                 try Task.checkCancellation()
+                guard loginID == requestID else { return }
                 authPhase = .signedIn(tokens.profile)
                 successHaptic()
                 await loadModels(using: tokens)
+                guard loginID == requestID else { return }
+                loginTask = nil
+                loginID = nil
             } catch is CancellationError {
+                guard loginID == requestID else { return }
+                loginTask = nil
+                loginID = nil
                 authPhase = .signedOut
             } catch {
+                guard loginID == requestID else { return }
+                loginTask = nil
+                loginID = nil
                 authPhase = .signedOut
                 errorMessage = error.localizedDescription
                 errorHaptic()
@@ -147,12 +164,15 @@ final class AppModel: ObservableObject {
     func cancelSignIn() {
         loginTask?.cancel()
         loginTask = nil
+        loginID = nil
         authPhase = .signedOut
     }
 
     func signOut() {
         stopGenerating()
         loginTask?.cancel()
+        loginTask = nil
+        loginID = nil
         if isUITesting {
             models = []
             selectedModelID = nil
@@ -330,6 +350,14 @@ final class AppModel: ObservableObject {
         guard isGenerating else { return }
         generationTask?.cancel()
         generationTask = nil
+        generationID = nil
+        if let assistantID = generationAssistantID,
+           let conversationID = generationConversationID,
+           assistantText(conversationID: conversationID, assistantID: assistantID).isEmpty {
+            removeMessage(assistantID, from: conversationID)
+        }
+        generationAssistantID = nil
+        generationConversationID = nil
         isGenerating = false
         persist()
         lightHaptic()
@@ -355,6 +383,10 @@ final class AppModel: ObservableObject {
             conversation.updatedAt = Date()
         }
         isGenerating = true
+        let requestID = UUID()
+        generationID = requestID
+        generationAssistantID = assistantID
+        generationConversationID = conversationID
         errorMessage = nil
         scrollSignal = UUID()
 
@@ -412,6 +444,7 @@ final class AppModel: ObservableObject {
             } catch is CancellationError {
                 // Keep any partial response when the user taps Stop.
             } catch {
+                guard generationID == requestID else { return }
                 if assistantText(
                     conversationID: conversationID,
                     assistantID: assistantID
@@ -422,8 +455,12 @@ final class AppModel: ObservableObject {
                 errorHaptic()
             }
 
+            guard generationID == requestID else { return }
             isGenerating = false
             generationTask = nil
+            generationID = nil
+            generationAssistantID = nil
+            generationConversationID = nil
             mutateConversation(conversationID) { $0.updatedAt = Date() }
             persist()
             scrollSignal = UUID()
@@ -455,6 +492,7 @@ final class AppModel: ObservableObject {
             }
             scrollSignal = UUID()
         }
+        try Task.checkCancellation()
     }
 
     private func loadModels(using initialTokens: OAuthTokens) async {
@@ -627,6 +665,7 @@ final class AppModel: ObservableObject {
     }
 
     private func generateUITestReply(assistantID: UUID, conversationID: UUID) {
+        guard let requestID = generationID else { return }
         let chunks = [
             "A good place to begin is to make the next step smaller. ",
             "Name the decision, the evidence you already have, and the one unknown ",
@@ -635,11 +674,11 @@ final class AppModel: ObservableObject {
         generationTask = Task { [weak self] in
             guard let self else { return }
             for chunk in chunks {
-                if Task.isCancelled { break }
+                if Task.isCancelled || generationID != requestID { return }
                 // Keep the deterministic stream observable long enough for UI
                 // automation and video evidence to exercise the Stop state.
                 try? await Task.sleep(nanoseconds: 750_000_000)
-                if Task.isCancelled { break }
+                if Task.isCancelled || generationID != requestID { return }
                 mutateConversation(conversationID) { conversation in
                     guard let index = conversation.messages.firstIndex(
                         where: { $0.id == assistantID }
@@ -648,8 +687,12 @@ final class AppModel: ObservableObject {
                 }
                 scrollSignal = UUID()
             }
+            guard generationID == requestID else { return }
             isGenerating = false
             generationTask = nil
+            generationID = nil
+            generationAssistantID = nil
+            generationConversationID = nil
             mutateConversation(conversationID) { $0.updatedAt = Date() }
             scrollSignal = UUID()
         }

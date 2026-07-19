@@ -102,7 +102,8 @@ must use ChatGPT/Codex OAuth rather than an OpenAI API key.
   sending, retry after token refresh, streaming updates, stop/regenerate,
   edit-and-resend branching, prompt/image actions, and persistence.
 - `ChatGPTLegacy/UI/SystemBridges.swift`: iOS 15 image picker, share sheet, and
-  Speech-framework dictation.
+  Speech-framework dictation with independent Speech and Microphone permission
+  handling.
 - `ChatGPTLegacy/UI/AppTheme.swift`: adaptive premium token system and reusable
   controls.
 - `ChatGPTLegacy/UI/RootView.swift` and `LoginView.swift`: restore state and
@@ -112,9 +113,9 @@ must use ChatGPT/Codex OAuth rather than an OpenAI API key.
   composer, message actions, history/account management, settings, and presets.
 - `ChatGPTLegacyTests/`: OAuth migration, SSE, Responses payload, persistence,
   image processing, and exact 414x736/320x568 render tests.
-- `ChatGPTLegacyUITests/`: eight deterministic flows with retained screenshots,
+- `ChatGPTLegacyUITests/`: nine deterministic flows with retained screenshots,
   including OAuth-code, dark-mode, landscape, premium-tour, and accessibility
-  coverage.
+  coverage plus Stop/immediate-resend task isolation.
 - `project.yml` plus `Info.plist` and asset catalogs: iOS 15 iPhone-only XcodeGen
   project, permissions, adaptive launch color, and a generated opaque app icon.
 - `.github/workflows/ci.yml` and `scripts/ci/`: workspace-local XcodeGen,
@@ -243,11 +244,38 @@ unit/UI tests green before release.
   one composer capture, and the raw tour video spent its build startup/cleanup
   on the simulator Home Screen. UI automation now dismisses that tutorial, and
   the recorder is bounded by explicit ready/finished markers emitted while the
-  tested app is on screen.
+  tested app is on screen. Frame extraction also rejects tour tracks outside an
+  8-65 second window, so the rejected 88-second recording cannot recur silently.
 - Release inspection for run `29684261077` found a second metadata defect before
   tagging: XcodeGen's application-target default overrode the project-level
   iPhone family and emitted `UIDeviceFamily=[1,2]`, along with unused iPad icon
   warnings. The application target now explicitly sets family `1`, and package
   verification fails if the built plist contains anything except iPhone. The
   next hosted run also adds deterministic OAuth device-code, dark-mode,
-  landscape, and 414x736 dark rendering coverage.
+  landscape, Stop/immediate-resend, and 414x736 dark rendering coverage.
+- A final concurrency audit found that a cancelled generation or OAuth task
+  could finish late and overwrite the state of an immediately started
+  replacement. Both flows now carry operation identities. Stopping before the
+  first token also removes the empty assistant placeholder synchronously; a
+  dedicated UI regression test immediately resends and requires the replacement
+  stream to stay active.
+- Manual inspection of run `29685055751` rejected two newly added screenshots
+  even though their interaction assertions passed: the requested dark style had
+  resolved light, and the landscape attachment captured a sideways transitional
+  surface with a large black unused canvas. UI tests now force dark mode through
+  the SwiftUI environment, landscape capture waits for a settled rotated window,
+  and a macOS pixel-sampling gate rejects light dark-mode evidence or black-barred
+  landscape evidence automatically.
+- The cleaned MP4 itself contained only app footage, but frame-zero inspection
+  showed that `simctl recordVideo` began encoding several seconds after the
+  ready marker and missed the opening chat/history beats. The deterministic tour
+  now holds its opening chat for six seconds so the published video begins with
+  the intended overview rather than midway through an action menu.
+- Run `29685055751` for commit `b68c33d` (2026-07-19) otherwise completed the
+  entire pipeline: 17 unit/visual tests and 8 UI tests passed, the cleaned tour
+  was bounded to 31.11 seconds instead of 88 seconds, native geometry passed,
+  and the arm64/iOS 15 ad-hoc package was verified with
+  `UIDeviceFamily=[1]`. The IPA SHA-256 was
+  `f11debe9fb9d2d5d3f8a8c89197d2949f2e9f47568fdb635509c8c5f7266b845`.
+  It remains intentionally untagged because the dark/landscape visual defects
+  above were found during artifact review.

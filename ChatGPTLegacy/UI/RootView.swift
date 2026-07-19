@@ -15,6 +15,7 @@ struct RootView: View {
             }
         }
         .tint(LegacyTheme.signal)
+        .preferredColorScheme(forcedUITestColorScheme)
         .task {
             await model.bootstrap()
         }
@@ -31,6 +32,15 @@ struct RootView: View {
                 Text(model.errorMessage ?? "")
             }
         )
+    }
+
+    private var forcedUITestColorScheme: ColorScheme? {
+        guard ProcessInfo.processInfo.arguments.contains("-uiTesting") else { return nil }
+        switch ProcessInfo.processInfo.environment["UITEST_COLOR_SCHEME"] {
+        case "dark": return .dark
+        case "light": return .light
+        default: return nil
+        }
     }
 }
 

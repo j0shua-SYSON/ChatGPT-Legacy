@@ -24,6 +24,13 @@ guard duration.isFinite, duration > 0 else {
     fputs("video has no readable duration\n", stderr)
     exit(3)
 }
+guard (8.0...65.0).contains(duration) else {
+    fputs(
+        String(format: "tour duration %.2fs is outside the 8-65s evidence window\n", duration),
+        stderr
+    )
+    exit(4)
+}
 
 let generator = AVAssetImageGenerator(asset: asset)
 generator.appliesPreferredTrackTransform = true

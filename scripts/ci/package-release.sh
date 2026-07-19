@@ -57,16 +57,32 @@ if [[ -n "$DSYM" && -d "$DSYM" ]]; then
     "$DSYM" "$RELEASE/ChatGPT-Legacy-v${VERSION}-dSYM.zip"
 fi
 
-EXECUTABLE="$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")"
-DEVICE_FAMILY="$(/usr/libexec/PlistBuddy -c 'Print :UIDeviceFamily:0' "$APP/Info.plist")"
+PLIST="$APP/Info.plist"
+EXECUTABLE="$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$PLIST")"
+DEVICE_FAMILY="$(/usr/libexec/PlistBuddy -c 'Print :UIDeviceFamily:0' "$PLIST")"
 if [[ "$DEVICE_FAMILY" != "1" ]]; then
   echo "Release must target iPhone only; found UIDeviceFamily[0]=$DEVICE_FAMILY." >&2
   exit 1
 fi
-if /usr/libexec/PlistBuddy -c 'Print :UIDeviceFamily:1' "$APP/Info.plist" >/dev/null 2>&1; then
+if /usr/libexec/PlistBuddy -c 'Print :UIDeviceFamily:1' "$PLIST" >/dev/null 2>&1; then
   echo "Release unexpectedly contains a second UIDeviceFamily entry." >&2
   exit 1
 fi
+BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
+APP_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+BUILD_NUMBER="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+MINIMUM_OS="$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$PLIST")"
+LAUNCH_STORYBOARD="$(/usr/libexec/PlistBuddy -c 'Print :UILaunchStoryboardName' "$PLIST")"
+REQUIRED_ARCH="$(/usr/libexec/PlistBuddy -c 'Print :UIRequiredDeviceCapabilities:0' "$PLIST")"
+ARCHITECTURES="$(lipo -archs "$EXECUTABLE")"
+
+[[ "$BUNDLE_ID" == "io.github.j0shuasyson.ChatGPTLegacy" ]]
+[[ "$APP_VERSION" == "$VERSION" ]]
+[[ "$BUILD_NUMBER" == "1" ]]
+[[ "$MINIMUM_OS" == "15.0" ]]
+[[ "$LAUNCH_STORYBOARD" == "LaunchScreen" ]]
+[[ "$REQUIRED_ARCH" == "arm64" ]]
+[[ "$ARCHITECTURES" == "arm64" ]]
 {
   echo "ChatGPT Legacy v$VERSION release evidence"
   echo "Built: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
@@ -80,7 +96,7 @@ fi
   /usr/bin/codesign -d --verbose=4 "$APP" 2>&1
   echo
   echo "Architectures:"
-  lipo -archs "$EXECUTABLE"
+  echo "$ARCHITECTURES"
   echo
   echo "Device family: iPhone only ($DEVICE_FAMILY)"
   echo
@@ -91,6 +107,4 @@ fi
   dwarfdump --uuid "$EXECUTABLE"
 } | tee "$RELEASE/release-evidence.txt"
 
-grep -q "arm64" "$RELEASE/release-evidence.txt"
-grep -q '"CFBundleShortVersionString" => "1.0.0"' "$RELEASE/release-evidence.txt"
 test -s "$IPA"
