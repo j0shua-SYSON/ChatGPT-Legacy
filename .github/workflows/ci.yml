@@ -55,7 +55,10 @@ jobs:
           set -euo pipefail
           .tools/xcodegen-dist/xcodegen/bin/xcodegen generate
           plutil -lint ChatGPTLegacy/Resources/Info.plist
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UILaunchStoryboardName' ChatGPTLegacy/Resources/Info.plist)" = "LaunchScreen"
           jq empty ChatGPTLegacy/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json
+          grep -q 'LaunchScreen.storyboard in Resources' ChatGPTLegacy.xcodeproj/project.pbxproj
+          grep -q 'Assets.xcassets in Resources' ChatGPTLegacy.xcodeproj/project.pbxproj
           xcodebuild -version | tee .artifacts/logs/xcode-version.log
           xcodebuild -project ChatGPTLegacy.xcodeproj -list | tee .artifacts/logs/project-list.log
 
@@ -75,6 +78,10 @@ jobs:
         if: always()
         shell: bash
         run: bash scripts/ci/export-evidence.sh
+
+      - name: Verify native screenshot and video geometry
+        shell: bash
+        run: bash scripts/ci/verify-visual-geometry.sh
 
       - name: Build and inspect the ad-hoc arm64 IPA
         shell: bash

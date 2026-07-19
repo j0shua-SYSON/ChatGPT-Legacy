@@ -53,6 +53,8 @@ final class ChatGPTLegacyUITests: XCTestCase {
         search.typeText("launch")
         XCTAssertTrue(app.staticTexts["A careful launch plan"].exists)
         capture("history-search")
+        search.typeText("\n")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 2))
 
         let actions = app.buttons["Actions for A careful launch plan"]
         XCTAssertTrue(actions.exists)

@@ -19,7 +19,10 @@ Every `main` push and version tag runs on a clean GitHub-hosted macOS runner:
    sheets, and accessibility-size control reachability.
 6. Run the premium UI tour again while recording an H.264 MP4, export every
    retained XCTest screenshot, and sample seven frames from the video.
-7. Build the generic arm64 iOS Release app with signing disabled, add an ad-hoc
+7. Require the fixed iPhone 6s Plus render to be exactly 1242x2208 pixels and
+   reject the 960x1440 (320x480 at 3x) compatibility canvas in both runtime
+   screenshots and sampled video frames.
+8. Build the generic arm64 iOS Release app with signing disabled, add an ad-hoc
    signature, verify the signature and arm64 slice, package the IPA, test the ZIP,
    inspect metadata/minimum OS, and generate SHA-256 digests.
 

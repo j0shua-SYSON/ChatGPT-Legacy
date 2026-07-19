@@ -623,7 +623,9 @@ final class AppModel: ObservableObject {
             guard let self else { return }
             for chunk in chunks {
                 if Task.isCancelled { break }
-                try? await Task.sleep(nanoseconds: 280_000_000)
+                // Keep the deterministic stream observable long enough for UI
+                // automation and video evidence to exercise the Stop state.
+                try? await Task.sleep(nanoseconds: 750_000_000)
                 if Task.isCancelled { break }
                 mutateConversation(conversationID) { conversation in
                     guard let index = conversation.messages.firstIndex(

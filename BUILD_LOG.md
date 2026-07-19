@@ -202,3 +202,24 @@ unit/UI tests green before release.
   message grouping, and a compact composer. UI hierarchy evidence confirms the
   failed UI flows were running and visible rather than crashing. The next green
   run must confirm native full-screen sizing and all interaction paths.
+- Run `29683731631` for commit `a863243` (2026-07-19): the app again compiled and
+  passed static analysis. All legacy migration tests passed, but exact timestamp
+  equality still failed because converting `Date` through Unix seconds loses
+  low-order IEEE-754 bits; new files now encode the exact reference-date bit
+  pattern and still accept both numeric and ISO-8601 history from prior builds.
+  Two of five UI tests passed, including Accessibility Medium and the signed-out
+  OAuth screen. The other failures were an intentionally mocked response that
+  completed before XCTest could observe Stop, plus a history-row menu obscured
+  by the search keyboard; the fixture stream is lengthened and search now has a
+  real Done submission path.
+- Crucially, generated-project inspection from run `29683731631` showed XcodeGen
+  silently ignored the target-level `resources:` block: neither
+  `Assets.xcassets` nor `LaunchScreen.storyboard` appeared in the PBX resource
+  phase, so the supposedly fixed build remained in 320x480 compatibility mode
+  and lacked its compiled app icon. Both resource types now remain inside the
+  auto-typed `sources` tree, and CI explicitly requires their `in Resources`
+  entries plus `UILaunchStoryboardName=LaunchScreen` before compilation.
+- Visual geometry is now a release-blocking CI check rather than a manual hope:
+  the true 6s Plus render must be 1242x2208 pixels, the compact render must be
+  960x1704, and neither the runtime tour screenshot nor sampled video frame may
+  be the broken 960x1440 compatibility canvas seen in the rejected runs.

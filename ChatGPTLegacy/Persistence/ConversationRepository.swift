@@ -48,10 +48,13 @@ final class ConversationRepository: ConversationPersisting {
 
     private static let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
-        // JSON numbers preserve Date's underlying time interval exactly. The
-        // previous ISO-8601 strategy rounded away subsecond precision, which
-        // made a save/load cycle subtly mutate conversation timestamps.
-        encoder.dateEncodingStrategy = .secondsSince1970
+        // Preserve the exact IEEE-754 value Foundation stores internally.
+        // Converting through seconds-since-1970 loses a few low-order bits.
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            let bits = String(date.timeIntervalSinceReferenceDate.bitPattern, radix: 16)
+            try container.encode("date-v1:\(bits)")
+        }
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         return encoder
     }()
@@ -70,6 +73,12 @@ final class ConversationRepository: ConversationPersisting {
             }
 
             let value = try container.decode(String.self)
+            if value.hasPrefix("date-v1:"),
+               let bits = UInt64(value.dropFirst("date-v1:".count), radix: 16) {
+                return Date(
+                    timeIntervalSinceReferenceDate: Double(bitPattern: bits)
+                )
+            }
             if let date = fractionalFormatter.date(from: value) ?? legacyFormatter.date(from: value) {
                 return date
             }

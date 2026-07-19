@@ -7,6 +7,7 @@ struct HistoryView: View {
     @State private var renameTarget: ChatConversation?
     @State private var shareText: ShareText?
     @State private var showSignOutConfirmation = false
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
         NavigationView {
@@ -78,6 +79,9 @@ struct HistoryView: View {
             TextField("Search titles and messages", text: $searchText)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
+                .focused($searchFocused)
+                .submitLabel(.done)
+                .onSubmit { searchFocused = false }
                 .foregroundColor(LegacyTheme.ink)
                 .accessibilityIdentifier("history.search")
             if !searchText.isEmpty {
