@@ -47,7 +47,6 @@ struct HistoryView: View {
             }
         }
         .navigationViewStyle(.stack)
-        .accessibilityIdentifier("history.screen")
         .sheet(item: $renameTarget) { conversation in
             RenameConversationView(
                 initialTitle: conversation.title,

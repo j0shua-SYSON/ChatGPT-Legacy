@@ -123,16 +123,17 @@ must use ChatGPT/Codex OAuth rather than an OpenAI API key.
 - `README.md`, `SECURITY.md`, `LICENSE`, `docs/TEST_PLAN.md`, and release notes:
   public documentation, threat boundary, install guidance, and test disclosure.
 
-Git and the public GitHub repository have not been initialized yet. The first
-hosted Xcode compile/test run is the next source-of-truth gate.
+Git is initialized on `main`, and the public repository is live at
+<https://github.com/j0shua-SYSON/ChatGPT-Legacy>. Hosted Xcode has compiled and
+analyzed the complete app target successfully; the active gate is making all
+unit/UI tests green before release.
 
 ## Current risks and items to verify
 
-- The Swift source has not compiled yet; expect iterative fixes from hosted
-  Xcode diagnostics.
-- Verify all iOS 15 API availability and Swift concurrency syntax.
-- FedRAMP claim/header routing and Codable defaults for tokens, attachments, and
-  pins are implemented but still need XCTest compilation/execution.
+- The app target compiles and passes the Xcode static analyzer on hosted Xcode
+  26.5. The next run must verify the timestamp and UI-identifier fixes.
+- Unit request-construction tests cover OAuth headers, FedRAMP routing, payloads,
+  migration defaults, SSE, persistence, images, and exact fixture rendering.
 - The current public macOS runner may not support an iPhone 8 Plus device type;
   fixed-size 414x736 rendering remains mandatory even if UI automation uses a
   newer simulator.
@@ -143,17 +144,16 @@ hosted Xcode compile/test run is the next source-of-truth gate.
 
 ## Next implementation steps
 
-1. Run local text/project checks; initialize Git; create and push the public repo.
-2. Iterate on GitHub Actions until green. Download screenshots/video/results into
-   this directory, inspect them, fix visible bugs, rerun, tag `v1.0.0`, and publish
-   the tested release assets.
-3. Preserve the generated `.xcodeproj` from hosted XcodeGen in the final source
-   tree if the first build confirms the project specification.
+1. Push the timestamp, native launch storyboard, and accessibility selector fixes.
+2. Iterate on GitHub Actions until green; download and inspect every retained
+   screenshot plus representative frames from the recorded UI tour.
+3. Preserve the generated `.xcodeproj`, rerun the final source-of-truth gate, tag
+   `v1.0.0`, verify the arm64 IPA/checksums/evidence, and publish the release.
 
 ## Operational facts
 
 - GitHub CLI is authenticated as `j0shua-SYSON` with `repo` and `workflow` scope.
-- `j0shua-SYSON/ChatGPT-Legacy` was verified absent and is available to create.
+- `j0shua-SYSON/ChatGPT-Legacy` exists and was verified public.
 - Local Git exists; local Xcode is unavailable.
 - A docs MCP entry was added only inside `.codex-tmp/codex-home`; no global Codex
   home was changed.
@@ -184,3 +184,21 @@ hosted Xcode compile/test run is the next source-of-truth gate.
   tests import target module `ChatGPTLegacy`. Fix: explicitly set
   `PRODUCT_MODULE_NAME: ChatGPTLegacy`. The evidence upload is also changed to
   include the hidden `.artifacts` tree so later diagnostics contain full logs.
+- Run `29683170143` for commit `04cb0e5` (2026-07-19): the complete app compiled
+  and passed static analysis on Xcode 26.5. Fifteen of sixteen unit tests passed;
+  the only failure proved that ISO-8601 JSON encoding rounded subsecond `Date`
+  precision. All five UI tests launched the app but failed because SwiftUI root
+  accessibility identifiers propagated over descendant identifiers. The
+  hierarchy and recordings also exposed a real 320x480 compatibility-mode bug:
+  the color-only `UILaunchScreen` entry did not establish a native launch size.
+  Fixes: encode new history timestamps as exact Unix seconds while accepting old
+  ISO-8601 files, remove propagating root identifiers and wait on concrete
+  controls, add a compiled launch storyboard, and assert a window larger than
+  320x568. Full results, hierarchies, screenshots, and five failure recordings
+  were downloaded under `.artifacts/runs/29683170143`.
+- Visual evidence from run `29683170143`: the exact 414x736 populated fixture and
+  320x568 empty fixture were inspected and are crisp, coherent, and readable;
+  the populated view has a strong hierarchy, restrained teal accents, clear
+  message grouping, and a compact composer. UI hierarchy evidence confirms the
+  failed UI flows were running and visible rather than crashing. The next green
+  run must confirm native full-screen sizing and all interaction paths.

@@ -24,7 +24,6 @@ struct LoginView: View {
             }
             .background(LegacyTheme.canvas.ignoresSafeArea())
         }
-        .accessibilityIdentifier("login.screen")
     }
 
     private var brandHeader: some View {

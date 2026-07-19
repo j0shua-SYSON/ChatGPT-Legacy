@@ -57,8 +57,10 @@ targets:
         excludes:
           - Resources/Info.plist
           - Resources/Assets.xcassets
+          - Resources/LaunchScreen.storyboard
     resources:
       - path: ChatGPTLegacy/Resources/Assets.xcassets
+      - path: ChatGPTLegacy/Resources/LaunchScreen.storyboard
     info:
       path: ChatGPTLegacy/Resources/Info.plist
     settings:

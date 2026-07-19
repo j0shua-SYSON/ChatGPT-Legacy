@@ -39,7 +39,6 @@ private struct SettingsContent: View {
             }
         }
         .navigationViewStyle(.stack)
-        .accessibilityIdentifier("settings.screen")
     }
 
     private var responseCard: some View {

@@ -20,7 +20,6 @@ struct ChatView: View {
             composer
         }
         .background(LegacyTheme.canvas.ignoresSafeArea())
-        .accessibilityIdentifier("chat.screen")
         .sheet(item: $activeSheet) { sheet in
             sheetView(sheet)
         }
@@ -459,6 +458,5 @@ private struct EmptyConversationView: View {
         }
         .frame(maxWidth: 330, alignment: .leading)
         .frame(maxWidth: .infinity)
-        .accessibilityIdentifier("chat.empty")
     }
 }

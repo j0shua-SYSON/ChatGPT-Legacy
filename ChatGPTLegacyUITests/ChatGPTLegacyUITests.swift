@@ -11,8 +11,11 @@ final class ChatGPTLegacyUITests: XCTestCase {
     func testSignedOutOAuthScreenFitsAndExplainsTrust() {
         launch(arguments: ["-uiTesting"])
 
-        XCTAssertTrue(app.otherElements["login.screen"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["login.continue"].isHittable)
+        let continueButton = app.buttons["login.continue"]
+        XCTAssertTrue(continueButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(continueButton.isHittable)
+        XCTAssertGreaterThan(app.windows.firstMatch.frame.width, 320)
+        XCTAssertGreaterThan(app.windows.firstMatch.frame.height, 568)
         XCTAssertTrue(app.otherElements["login.trustRail"].exists)
         XCTAssertTrue(app.staticTexts["No API key"].exists)
         XCTAssertTrue(app.staticTexts["Keychain protected"].exists)
@@ -22,8 +25,9 @@ final class ChatGPTLegacyUITests: XCTestCase {
     func testEmptyConversationPresetAndStreamingResponse() {
         launch(arguments: ["-uiTesting", "-uiTestSignedIn"])
 
-        XCTAssertTrue(app.otherElements["chat.empty"].waitForExistence(timeout: 5))
-        app.buttons["empty.preset.explain"].tap()
+        let preset = app.buttons["empty.preset.explain"]
+        XCTAssertTrue(preset.waitForExistence(timeout: 5))
+        preset.tap()
 
         let composer = app.textViews["composer.text"]
         XCTAssertTrue(composer.waitForExistence(timeout: 2))
@@ -40,8 +44,10 @@ final class ChatGPTLegacyUITests: XCTestCase {
     func testHistorySearchAndRenameFlow() {
         launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
 
-        app.buttons["chat.history"].tap()
-        XCTAssertTrue(app.otherElements["history.screen"].waitForExistence(timeout: 3))
+        let historyButton = app.buttons["chat.history"]
+        XCTAssertTrue(historyButton.waitForExistence(timeout: 5))
+        historyButton.tap()
+        XCTAssertTrue(app.buttons["history.done"].waitForExistence(timeout: 3))
         let search = app.textFields["history.search"]
         search.tap()
         search.typeText("launch")
@@ -63,19 +69,19 @@ final class ChatGPTLegacyUITests: XCTestCase {
     func testPremiumUITour() {
         launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
 
-        XCTAssertTrue(app.otherElements["chat.screen"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
         capture("tour-01-chat")
         pauseForVideo()
 
         app.buttons["chat.history"].tap()
-        XCTAssertTrue(app.otherElements["history.screen"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["history.done"].waitForExistence(timeout: 3))
         capture("tour-02-history")
         pauseForVideo()
         app.buttons["history.done"].tap()
 
         app.buttons["chat.actions"].tap()
         app.buttons["Prompt library"].tap()
-        XCTAssertTrue(app.otherElements["prompts.screen"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["prompts.cancel"].waitForExistence(timeout: 3))
         capture("tour-03-prompts")
         pauseForVideo()
         app.buttons["prompts.item.decide"].tap()
@@ -91,11 +97,11 @@ final class ChatGPTLegacyUITests: XCTestCase {
 
         app.buttons["chat.actions"].tap()
         app.buttons["Response settings"].tap()
-        XCTAssertTrue(app.otherElements["settings.screen"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["settings.done"].waitForExistence(timeout: 3))
         capture("tour-06-settings")
         pauseForVideo()
         app.buttons["settings.done"].tap()
-        XCTAssertTrue(app.otherElements["chat.screen"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 3))
         capture("tour-07-finished")
     }
 
@@ -107,7 +113,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
             "UICTContentSizeCategoryAccessibilityMedium"
         ])
 
-        XCTAssertTrue(app.otherElements["chat.screen"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["chat.history"].isHittable)
         XCTAssertTrue(app.buttons["chat.new"].isHittable)
         XCTAssertTrue(app.buttons["composer.add"].isHittable)

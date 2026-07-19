@@ -74,7 +74,6 @@ struct PromptLibraryView: View {
             }
         }
         .navigationViewStyle(.stack)
-        .accessibilityIdentifier("prompts.screen")
     }
 
     private var searchField: some View {

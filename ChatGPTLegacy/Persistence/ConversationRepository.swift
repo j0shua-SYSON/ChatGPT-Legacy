@@ -48,14 +48,37 @@ final class ConversationRepository: ConversationPersisting {
 
     private static let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        // JSON numbers preserve Date's underlying time interval exactly. The
+        // previous ISO-8601 strategy rounded away subsecond precision, which
+        // made a save/load cycle subtly mutate conversation timestamps.
+        encoder.dateEncodingStrategy = .secondsSince1970
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         return encoder
     }()
 
     private static let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        let fractionalFormatter = ISO8601DateFormatter()
+        fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let legacyFormatter = ISO8601DateFormatter()
+        legacyFormatter.formatOptions = [.withInternetDateTime]
+
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            if let interval = try? container.decode(Double.self) {
+                return Date(timeIntervalSince1970: interval)
+            }
+
+            let value = try container.decode(String.self)
+            if let date = fractionalFormatter.date(from: value) ?? legacyFormatter.date(from: value) {
+                return date
+            }
+
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Expected a Unix timestamp or ISO-8601 date."
+            )
+        }
         return decoder
     }()
 }

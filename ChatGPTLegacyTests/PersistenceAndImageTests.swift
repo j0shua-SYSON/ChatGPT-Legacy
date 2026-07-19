@@ -29,9 +29,17 @@ final class PersistenceAndImageTests: XCTestCase {
 
     func testLegacyHistoryDefaultsNewFields() throws {
         let json = #"[{"id":"00000000-0000-0000-0000-000000000001","title":"Old","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z","messages":[{"id":"00000000-0000-0000-0000-000000000002","role":"user","text":"Hi","createdAt":"2026-01-01T00:00:00Z"}]}]"#
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let decoded = try decoder.decode([ChatConversation].self, from: Data(json.utf8))
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        try FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+        let fileURL = directory.appendingPathComponent("conversations.json")
+        try Data(json.utf8).write(to: fileURL)
+
+        let decoded = try ConversationRepository(fileURL: fileURL).load()
 
         XCTAssertFalse(decoded[0].isPinned)
         XCTAssertTrue(decoded[0].messages[0].attachments.isEmpty)

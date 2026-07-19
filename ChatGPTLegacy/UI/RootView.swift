@@ -48,6 +48,5 @@ private struct LaunchView: View {
                     .foregroundColor(LegacyTheme.muted)
             }
         }
-        .accessibilityIdentifier("launch.screen")
     }
 }
