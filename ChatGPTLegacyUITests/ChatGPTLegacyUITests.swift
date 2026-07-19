@@ -158,12 +158,15 @@ final class ChatGPTLegacyUITests: XCTestCase {
 
     func testLandscapeKeepsNavigationAndComposerReachable() {
         defer { XCUIDevice.shared.orientation = .portrait }
+        // Start the application after the simulator is settled in landscape.
+        // Rotating an already-presented SwiftUI host can yield an XCUI screenshot
+        // with a portrait backing surface inside a landscape frame on Xcode 26.
+        XCUIDevice.shared.orientation = .landscapeLeft
         launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
 
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
-        XCUIDevice.shared.orientation = .landscapeLeft
         XCTAssertTrue(waitForLandscape(timeout: 5))
-        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
         _ = app.screenshot()
         RunLoop.current.run(until: Date().addingTimeInterval(0.4))
         XCTAssertTrue(app.buttons["chat.history"].isHittable)

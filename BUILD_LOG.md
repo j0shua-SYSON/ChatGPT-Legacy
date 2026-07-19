@@ -355,3 +355,12 @@ unit/UI tests green before release.
   The card now uses the shorter visible heading `Instructions`; its editor still
   exposes the complete `Custom instructions` label and explanatory hint to
   VoiceOver. Packaging was again correctly withheld.
+- Manual review of run `29688733089` also caught a still-invalid raw runtime
+  landscape attachment: although its PNG was 2868x1320 and XCUI reported a
+  landscape window, the portrait backing surface was rotated into the left half
+  and the remaining canvas was black. The exact 2208x1242 6s Plus landscape
+  render remained correct. The existing post-test pixel gate would reject this
+  runtime image once tests reached it, but the UI test now settles the simulator
+  in landscape before launching the app, avoiding Xcode 26's transitional
+  SwiftUI-host snapshot. The final artifact must pass both the no-black-bars
+  pixel gate and manual landscape inspection.
