@@ -86,7 +86,9 @@ struct ChatView: View {
                 .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .contentShape(Rectangle())
             }
+            .accessibilityElement(children: .ignore)
             .accessibilityLabel("Select model")
+            .accessibilityValue(model.currentModel?.displayName ?? "No model selected")
             .accessibilityIdentifier("chat.modelPicker")
             .frame(maxWidth: .infinity, alignment: .leading)
 

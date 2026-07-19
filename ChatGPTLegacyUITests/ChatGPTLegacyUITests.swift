@@ -212,7 +212,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
 
         launch(arguments: ["-uiTesting"])
         XCTAssertTrue(app.buttons["login.continue"].waitForExistence(timeout: 5))
-        try app.performAccessibilityAudit()
+        try auditCurrentSurface()
     }
 
     func testOAuthDeviceCodeSurfacePassesAutomatedAccessibilityAudit() throws {
@@ -222,7 +222,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
 
         launch(arguments: ["-uiTesting", "-uiTestDeviceCode"])
         XCTAssertTrue(app.staticTexts["login.code"].waitForExistence(timeout: 5))
-        try app.performAccessibilityAudit()
+        try auditCurrentSurface()
     }
 
     func testChatSurfacePassesAutomatedAccessibilityAudit() throws {
@@ -232,7 +232,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
 
         launch(arguments: ["-uiTesting", "-uiTestSignedIn", "-uiTestPopulated"])
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
-        try app.performAccessibilityAudit()
+        try auditCurrentSurface()
     }
 
     func testHistorySurfacePassesAutomatedAccessibilityAudit() throws {
@@ -244,7 +244,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
         XCTAssertTrue(app.buttons["chat.history"].waitForExistence(timeout: 5))
         app.buttons["chat.history"].tap()
         XCTAssertTrue(app.buttons["history.done"].waitForExistence(timeout: 3))
-        try app.performAccessibilityAudit()
+        try auditCurrentSurface()
     }
 
     func testPromptLibrarySurfacePassesAutomatedAccessibilityAudit() throws {
@@ -257,7 +257,7 @@ final class ChatGPTLegacyUITests: XCTestCase {
         app.buttons["chat.actions"].tap()
         app.buttons["Prompt library"].tap()
         XCTAssertTrue(app.buttons["prompts.cancel"].waitForExistence(timeout: 3))
-        try app.performAccessibilityAudit()
+        try auditCurrentSurface()
     }
 
     func testSettingsSurfacePassesAutomatedAccessibilityAudit() throws {
@@ -270,13 +270,21 @@ final class ChatGPTLegacyUITests: XCTestCase {
         app.buttons["chat.actions"].tap()
         app.buttons["Response settings"].tap()
         XCTAssertTrue(app.buttons["settings.done"].waitForExistence(timeout: 3))
-        try app.performAccessibilityAudit()
+        try auditCurrentSurface()
     }
 
     private func launch(arguments: [String]) {
         app.launchArguments = arguments
         app.launchEnvironment["UITEST_DISABLE_ANIMATIONS"] = "0"
         app.launch()
+    }
+
+    @available(iOS 17.0, *)
+    private func auditCurrentSurface() throws {
+        // Apple recommends continuing after an audit finding so one element
+        // cannot hide the other issues on the same visible surface.
+        continueAfterFailure = true
+        try app.performAccessibilityAudit()
     }
 
     private func capture(_ name: String) {

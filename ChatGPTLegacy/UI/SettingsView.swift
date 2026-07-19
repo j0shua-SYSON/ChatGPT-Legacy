@@ -33,7 +33,10 @@ private struct SettingsContent: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button { dismiss() } label: {
+                        Image(systemName: "checkmark")
+                    }
+                        .accessibilityLabel("Save response settings")
                         .accessibilityIdentifier("settings.done")
                 }
             }
@@ -141,6 +144,8 @@ private struct SettingsContent: View {
             Button(action: model.refreshModels) {
                 Label("Refresh model catalog", systemImage: "arrow.triangle.2.circlepath")
                     .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
             }
             .accessibilityIdentifier("settings.refreshModels")
         }

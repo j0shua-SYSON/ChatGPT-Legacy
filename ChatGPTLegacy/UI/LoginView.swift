@@ -140,6 +140,7 @@ struct LoginView: View {
                 ProgressView()
                     .scaleEffect(0.8)
                     .tint(LegacyTheme.signal)
+                    .accessibilityHidden(true)
                 Text("Waiting for browser sign-in")
                     .font(.footnote.weight(.medium))
                     .foregroundColor(LegacyTheme.muted)
@@ -234,5 +235,7 @@ struct LoginView: View {
                 .font(LegacyTheme.utilitySmall)
                 .foregroundColor(LegacyTheme.faint)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Unofficial open-source client, version 1.0")
     }
 }

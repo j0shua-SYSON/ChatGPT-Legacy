@@ -57,6 +57,9 @@ struct PromptLibraryView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(preset.title)
+                            .accessibilityHint(preset.prompt)
                             .accessibilityIdentifier("prompts.item.\(preset.id)")
                         }
                     }
@@ -68,7 +71,10 @@ struct PromptLibraryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                    }
+                        .accessibilityLabel("Close prompt library")
                         .accessibilityIdentifier("prompts.cancel")
                 }
             }

@@ -302,3 +302,14 @@ unit/UI tests green before release.
   styles, compact controls expose at least 44-by-44-point hit regions, and the
   audit is split into six independent surface tests so one early issue cannot
   hide findings on chat, history, prompts, or settings.
+- Run `29686769614` for commit `e5f4840` (2026-07-19) kept all 18
+  unit/render tests green and ran all 15 UI flows. The nine functional UI tests
+  passed; all six independent audits executed and exposed four Dynamic Type
+  nodes plus two undersized nodes. Exported element crops identified the exact
+  targets: model value, history Done, prompt title, version label, OAuth
+  spinner, and settings refresh. Decorative/duplicate children are now grouped
+  behind meaningful VoiceOver labels or values, toolbar actions use labeled
+  symbols, the noninteractive spinner is hidden from the accessibility tree,
+  and refresh has a 44-point hit region. Audit tests now follow Apple's
+  recommendation to continue after a finding, allowing a single run to report
+  every issue on each visible surface while still failing the release gate.
