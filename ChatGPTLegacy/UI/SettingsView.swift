@@ -80,7 +80,7 @@ private struct SettingsContent: View {
 
     private var instructionsCard: some View {
         settingCard {
-            SectionLabel(text: "Custom instructions")
+            SectionLabel(text: "Instructions")
             Text("Applied privately to every new response.")
                 .font(.caption)
                 .foregroundColor(LegacyTheme.muted)

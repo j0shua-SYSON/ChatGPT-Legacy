@@ -345,3 +345,13 @@ unit/UI tests green before release.
   regular stack, and section labels use readable title case with restrained
   tracking. These changes are awaiting the next hosted source-of-truth run; no
   audit type has been suppressed or broadly filtered.
+- Run `29688733089` for commit `abdb7a1` (2026-07-19) kept all 19
+  unit/render tests green and passed 14 of 15 UI tests. Chat, history, prompt
+  library, OAuth device code, and signed-out OAuth all passed their complete
+  audits; settings retained one clipped-text warning for the long `Custom
+  instructions` card heading at larger Dynamic Type sizes. The exported full
+  settings screenshot and element crop were inspected: normal-size geometry is
+  clean, but the label remains too wide at the audit's largest simulated size.
+  The card now uses the shorter visible heading `Instructions`; its editor still
+  exposes the complete `Custom instructions` label and explanatory hint to
+  VoiceOver. Packaging was again correctly withheld.
