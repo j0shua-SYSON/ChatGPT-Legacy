@@ -212,6 +212,8 @@ struct GrowingTextView: UIViewRepresentable {
     @Binding var isFirstResponder: Bool
 
     var maxHeight: CGFloat = 116
+    var fieldAccessibilityLabel = "Message ChatGPT"
+    var fieldAccessibilityHint = "Enter a message for ChatGPT"
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -234,11 +236,15 @@ struct GrowingTextView: UIViewRepresentable {
         textView.textContainer.lineFragmentPadding = 0
         textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         textView.accessibilityIdentifier = "composer.text"
+        textView.accessibilityLabel = fieldAccessibilityLabel
+        textView.accessibilityHint = fieldAccessibilityHint
         return textView
     }
 
     func updateUIView(_ textView: UITextView, context: Context) {
         context.coordinator.parent = self
+        textView.accessibilityLabel = fieldAccessibilityLabel
+        textView.accessibilityHint = fieldAccessibilityHint
         if textView.text != text {
             textView.text = text
         }

@@ -36,10 +36,22 @@ final class VisualLayoutTests: XCTestCase {
         attach(image, name: "chat-736x414-light")
     }
 
+    func testPremiumChatRendersAtIPhone6sPlusWithAccessibilityText() throws {
+        let image = try renderChat(
+            size: CGSize(width: 414, height: 736),
+            populated: true,
+            sizeCategory: .accessibilityMedium
+        )
+        XCTAssertEqual(image.size, CGSize(width: 414, height: 736))
+        XCTAssertGreaterThan(try XCTUnwrap(image.pngData()).count, 20_000)
+        attach(image, name: "chat-414x736-accessibility-medium")
+    }
+
     private func renderChat(
         size: CGSize,
         populated: Bool,
-        style: UIUserInterfaceStyle = .light
+        style: UIUserInterfaceStyle = .light,
+        sizeCategory: ContentSizeCategory = .large
     ) throws -> UIImage {
         let suite = try XCTUnwrap(UserDefaults(suiteName: "visual-\(UUID().uuidString)"))
         let repository = InMemoryConversationRepository()
@@ -55,6 +67,7 @@ final class VisualLayoutTests: XCTestCase {
             rootView: ChatView()
                 .environmentObject(model)
                 .environment(\.colorScheme, colorScheme)
+                .environment(\.sizeCategory, sizeCategory)
         )
         controller.overrideUserInterfaceStyle = style
         let window = UIWindow(frame: CGRect(origin: .zero, size: size))

@@ -22,23 +22,26 @@ struct PromptLibraryView: View {
                                 onSelect(preset)
                             } label: {
                                 HStack(alignment: .top, spacing: 13) {
-                                    Text(String(preset.category.prefix(1)))
-                                        .font(.system(.subheadline, design: .monospaced).weight(.bold))
+                                    Image(systemName: "sparkles")
+                                        .font(.subheadline.weight(.semibold))
                                         .foregroundColor(LegacyTheme.signal)
                                         .frame(width: 36, height: 36)
                                         .background(
                                             RoundedRectangle(cornerRadius: 10, style: .continuous)
                                                 .fill(LegacyTheme.signalSoft)
                                         )
+                                        .accessibilityHidden(true)
                                     VStack(alignment: .leading, spacing: 5) {
                                         Text(preset.title)
                                             .font(.subheadline.weight(.semibold))
                                             .foregroundColor(LegacyTheme.ink)
+                                            .fixedSize(horizontal: false, vertical: true)
                                         Text(preset.prompt)
                                             .font(.caption)
                                             .foregroundColor(LegacyTheme.muted)
-                                            .lineLimit(2)
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
+                                    .layoutPriority(1)
                                     Spacer(minLength: 4)
                                     Image(systemName: "arrow.up.left")
                                         .font(.caption.weight(.semibold))
@@ -57,7 +60,6 @@ struct PromptLibraryView: View {
                                 )
                             }
                             .buttonStyle(.plain)
-                            .accessibilityElement(children: .ignore)
                             .accessibilityLabel(preset.title)
                             .accessibilityHint(preset.prompt)
                             .accessibilityIdentifier("prompts.item.\(preset.id)")
@@ -86,7 +88,8 @@ struct PromptLibraryView: View {
         HStack(spacing: 9) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(LegacyTheme.muted)
-            TextField("Find a prompt shape", text: $searchText)
+            TextField("Search prompts", text: $searchText)
+                .accessibilityLabel("Search prompt library")
                 .accessibilityIdentifier("prompts.search")
             if !searchText.isEmpty {
                 Button {
@@ -101,7 +104,8 @@ struct PromptLibraryView: View {
             }
         }
         .padding(.horizontal, 14)
-        .frame(height: 44)
+        .padding(.vertical, 8)
+        .frame(minHeight: 44)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(LegacyTheme.paper)
@@ -129,7 +133,7 @@ struct PromptLibraryView: View {
                                     : LegacyTheme.muted
                             )
                             .padding(.horizontal, 13)
-                            .frame(height: 34)
+                            .padding(.vertical, 8)
                             .background(
                                 Capsule().fill(
                                     selectedCategory == category

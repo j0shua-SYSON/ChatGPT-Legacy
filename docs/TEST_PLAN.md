@@ -12,8 +12,9 @@ Every `main` push and version tag runs on a clean GitHub-hosted macOS runner:
 3. Execute unit tests for OAuth/JWT migration, SSE framing and server errors,
    multimodal Responses payloads, atomic history persistence and migration,
    image downsampling, and fixed-size SwiftUI rendering.
-4. Render and retain 414x736 portrait and 736x414 landscape iPhone 6s Plus
-   screenshots plus a 320x568 compact legacy-iPhone screenshot inside XCTest.
+4. Render and retain 414x736 portrait, Accessibility Medium, and 736x414
+   landscape iPhone 6s Plus screenshots plus a 320x568 compact legacy-iPhone
+   screenshot inside XCTest.
 5. Run deterministic XCUITests covering signed-out trust disclosure, the OAuth
    device-code state, prompt insertion, streaming/stop state, history search,
    rename, stop-then-immediate-resend task isolation, all premium-tour sheets,

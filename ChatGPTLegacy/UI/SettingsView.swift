@@ -88,7 +88,9 @@ private struct SettingsContent: View {
                 text: $settings.customInstructions,
                 calculatedHeight: $instructionsHeight,
                 isFirstResponder: $instructionsFocused,
-                maxHeight: 180
+                maxHeight: 180,
+                fieldAccessibilityLabel: "Custom instructions",
+                fieldAccessibilityHint: "Enter instructions applied to every response"
             )
             .frame(height: max(108, instructionsHeight))
             .padding(.horizontal, 8)

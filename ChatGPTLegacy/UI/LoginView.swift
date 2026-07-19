@@ -35,9 +35,10 @@ struct LoginView: View {
                     .tracking(1.5)
                     .foregroundColor(LegacyTheme.ink)
                 Text("NATIVE CLIENT · iOS 15")
-                    .font(LegacyTheme.utilitySmall)
+                    .font(.caption.weight(.medium))
                     .tracking(0.7)
                     .foregroundColor(LegacyTheme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -204,6 +205,7 @@ struct LoginView: View {
                     Image(systemName: icon)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(LegacyTheme.signal)
+                        .accessibilityHidden(true)
                 }
                 if !isLast {
                     Rectangle()
@@ -225,17 +227,11 @@ struct LoginView: View {
     }
 
     private var footer: some View {
-        HStack {
-            Text("UNOFFICIAL · OPEN SOURCE")
-                .font(LegacyTheme.utilitySmall)
-                .tracking(1)
-                .foregroundColor(LegacyTheme.faint)
-            Spacer()
-            Text("1.0")
-                .font(LegacyTheme.utilitySmall)
-                .foregroundColor(LegacyTheme.faint)
-        }
-        .accessibilityElement(children: .ignore)
+        Text("UNOFFICIAL · OPEN SOURCE · 1.0")
+            .font(.caption.weight(.medium))
+            .tracking(0.6)
+            .foregroundColor(LegacyTheme.faint)
+            .fixedSize(horizontal: false, vertical: true)
         .accessibilityLabel("Unofficial open-source client, version 1.0")
     }
 }

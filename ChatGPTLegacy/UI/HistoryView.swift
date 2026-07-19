@@ -79,13 +79,14 @@ struct HistoryView: View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(LegacyTheme.muted)
-            TextField("Search titles and messages", text: $searchText)
+            TextField("Search conversations", text: $searchText)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
                 .focused($searchFocused)
                 .submitLabel(.done)
                 .onSubmit { searchFocused = false }
                 .foregroundColor(LegacyTheme.ink)
+                .accessibilityLabel("Search conversation titles and messages")
                 .accessibilityIdentifier("history.search")
             if !searchText.isEmpty {
                 Button {
@@ -100,7 +101,8 @@ struct HistoryView: View {
             }
         }
         .padding(.horizontal, 14)
-        .frame(height: 46)
+        .padding(.vertical, 8)
+        .frame(minHeight: 46)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(LegacyTheme.paper)
@@ -140,15 +142,14 @@ struct HistoryView: View {
                         Text(conversation.title)
                             .font(.subheadline.weight(.semibold))
                             .foregroundColor(LegacyTheme.ink)
-                            .lineLimit(1)
-                        HStack(spacing: 6) {
-                            Text("\(conversation.messages.count) messages")
-                            Text("·")
+                            .fixedSize(horizontal: false, vertical: true)
+                        (
+                            Text("\(conversation.messages.count) messages · ") +
                             Text(conversation.updatedAt, style: .relative)
-                        }
-                        .font(.caption)
-                        .foregroundColor(LegacyTheme.muted)
-                        .lineLimit(1)
+                        )
+                            .font(.caption)
+                            .foregroundColor(LegacyTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 4)
                 }
@@ -218,12 +219,14 @@ struct HistoryView: View {
                             Image(systemName: "person.fill")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(LegacyTheme.signal)
+                                .accessibilityHidden(true)
                         )
                     VStack(alignment: .leading, spacing: 2) {
                         Text(profile.displayName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundColor(LegacyTheme.ink)
-                            .lineLimit(1)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityLabel("Signed-in account: \(profile.displayName)")
                         Text(profile.planLabel)
                             .font(.caption)
                             .foregroundColor(LegacyTheme.muted)

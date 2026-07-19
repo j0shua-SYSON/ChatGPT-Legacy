@@ -68,7 +68,7 @@ struct ChatView: View {
                     Text(model.activeConversation?.title ?? "ChatGPT Legacy")
                         .font(.system(.subheadline, design: .rounded).weight(.semibold))
                         .foregroundColor(LegacyTheme.ink)
-                        .lineLimit(1)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     HStack(spacing: 4) {
                         if model.isLoadingModels {
@@ -77,7 +77,7 @@ struct ChatView: View {
                         Text(model.currentModel?.displayName ?? "No model")
                             .font(LegacyTheme.utilitySmall)
                             .foregroundColor(LegacyTheme.signal)
-                            .lineLimit(1)
+                            .fixedSize(horizontal: false, vertical: true)
                         Image(systemName: "chevron.down")
                             .font(.system(size: 8, weight: .bold))
                             .foregroundColor(LegacyTheme.signal)
@@ -86,10 +86,10 @@ struct ChatView: View {
                 .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .contentShape(Rectangle())
             }
-            .accessibilityElement(children: .ignore)
             .accessibilityLabel("Select model")
             .accessibilityValue(model.currentModel?.displayName ?? "No model selected")
             .accessibilityIdentifier("chat.modelPicker")
+            .layoutPriority(1)
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Menu {
@@ -257,6 +257,7 @@ struct ChatView: View {
                             .padding(.leading, 5)
                             .padding(.top, 10)
                             .allowsHitTesting(false)
+                            .accessibilityHidden(true)
                     }
                     GrowingTextView(
                         text: $model.draft,

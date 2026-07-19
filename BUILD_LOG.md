@@ -313,3 +313,15 @@ unit/UI tests green before release.
   and refresh has a 44-point hit region. Audit tests now follow Apple's
   recommendation to continue after a finding, allowing a single run to report
   every issue on each visible surface while still failing the release gate.
+- Run `29687332174` for commit `02173d1` (2026-07-19) used the continuing audit
+  mode and enumerated the complete visible set: 56 accessibility findings and
+  one functional tour failure. The tour regression was caused by converting
+  prompt buttons into new accessibility elements, which stripped their stable
+  automation identifiers; that modifier is removed. The audit findings resolve
+  into five shared causes rather than 56 unrelated bugs: compressed fixed-row
+  text, utility text that did not scale fully, low-contrast secondary tokens,
+  unlabeled UIKit text views/decorative symbols, and truncated search prompts.
+  Rows now reflow vertically, utility fonts use semantic Dynamic Type styles,
+  light-theme secondary colors exceed 4.5:1 with margin, prompt badges use
+  decorative symbols, text views expose real labels/hints, and search prompts
+  are shorter inside flexible-height fields. No audit category is filtered.

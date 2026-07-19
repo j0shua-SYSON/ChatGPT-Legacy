@@ -6,10 +6,10 @@ enum LegacyTheme {
     static let paper = adaptive(light: 0xFBFCFB, dark: 0x18201E)
     static let elevated = adaptive(light: 0xFFFFFF, dark: 0x202A27)
     static let ink = adaptive(light: 0x17201E, dark: 0xEDF5F2)
-    static let muted = adaptive(light: 0x64716D, dark: 0x9AABA5)
-    static let faint = adaptive(light: 0x87938F, dark: 0x73827D)
+    static let muted = adaptive(light: 0x56635F, dark: 0xA7B8B2)
+    static let faint = adaptive(light: 0x5E6B66, dark: 0x8B9C96)
     static let hairline = adaptive(light: 0xCFD9D5, dark: 0x31403B)
-    static let signal = adaptive(light: 0x087A67, dark: 0x4ACCB0)
+    static let signal = adaptive(light: 0x06715F, dark: 0x4ACCB0)
     static let signalSoft = adaptive(light: 0xDCEFEA, dark: 0x153B32)
     static let userBubble = adaptive(light: 0x18332D, dark: 0xCDE9E1)
     static let userText = adaptive(light: 0xF5FBF9, dark: 0x12221E)
@@ -18,8 +18,8 @@ enum LegacyTheme {
     static let display = Font.system(.largeTitle, design: .serif).weight(.semibold)
     static let title = Font.system(.title3, design: .rounded).weight(.semibold)
     static let body = Font.system(.body, design: .default)
-    static let utility = Font.system(.caption, design: .monospaced).weight(.medium)
-    static let utilitySmall = Font.system(.caption2, design: .monospaced).weight(.medium)
+    static let utility = Font.caption.weight(.semibold)
+    static let utilitySmall = Font.caption2.weight(.medium)
     static let authorizationCode = Font.system(.title, design: .monospaced).weight(.semibold)
 
     private static func adaptive(light: UInt32, dark: UInt32) -> Color {
@@ -137,5 +137,6 @@ struct SectionLabel: View {
             .font(LegacyTheme.utility)
             .tracking(1.4)
             .foregroundColor(LegacyTheme.muted)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
