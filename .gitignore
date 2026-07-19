@@ -1,0 +1,19 @@
+# Workspace-local tooling and downloaded evidence
+.codex-tmp/
+.tmp/
+.artifacts/
+.derived-data/
+.build/
+
+# Xcode
+DerivedData/
+build/
+*.xcresult
+*.ipa
+*.dSYM.zip
+*.app.dSYM/
+xcuserdata/
+*.xcuserstate
+
+# macOS
+.DS_Store

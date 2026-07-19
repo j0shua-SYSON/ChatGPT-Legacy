@@ -1,0 +1,129 @@
+name: iOS 15 build, test, and release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-package:
+    runs-on: macos-latest
+    timeout-minutes: 90
+
+    env:
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
+      NSUnbufferedIO: YES
+      XCODEGEN_VERSION: 2.46.0
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Keep build state in the workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp .tools .build/module-cache .derived-data .artifacts/logs
+          echo "TMPDIR=$GITHUB_WORKSPACE/.tmp" >> "$GITHUB_ENV"
+          echo "SWIFT_MODULECACHE_PATH=$GITHUB_WORKSPACE/.build/module-cache" >> "$GITHUB_ENV"
+          echo "CLANG_MODULE_CACHE_PATH=$GITHUB_WORKSPACE/.build/module-cache" >> "$GITHUB_ENV"
+
+      - name: Install workspace-local XcodeGen
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip" \
+            --output .tools/xcodegen.zip
+          ditto -x -k .tools/xcodegen.zip .tools/xcodegen-dist
+          chmod +x .tools/xcodegen-dist/xcodegen/bin/xcodegen
+          .tools/xcodegen-dist/xcodegen/bin/xcodegen --version
+
+      - name: Generate and validate the Xcode project
+        shell: bash
+        run: |
+          set -euo pipefail
+          .tools/xcodegen-dist/xcodegen/bin/xcodegen generate
+          plutil -lint ChatGPTLegacy/Resources/Info.plist
+          plutil -lint ChatGPTLegacy/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json
+          xcodebuild -version | tee .artifacts/logs/xcode-version.log
+          xcodebuild -project ChatGPTLegacy.xcodeproj -list | tee .artifacts/logs/project-list.log
+
+      - name: Prepare a legacy-sized simulator when available
+        shell: bash
+        run: bash scripts/ci/prepare-simulator.sh
+
+      - name: Analyze and run the complete unit and UI suite
+        shell: bash
+        run: bash scripts/ci/run-tests.sh
+
+      - name: Record the deterministic premium UI tour
+        shell: bash
+        run: bash scripts/ci/record-ui-tour.sh
+
+      - name: Export screenshots, coverage, and video frames
+        if: always()
+        shell: bash
+        run: bash scripts/ci/export-evidence.sh
+
+      - name: Build and inspect the ad-hoc arm64 IPA
+        shell: bash
+        run: bash scripts/ci/package-release.sh 1.0.0
+
+      - name: Assemble release evidence and checksums
+        shell: bash
+        run: bash scripts/ci/assemble-release.sh 1.0.0
+
+      - name: Upload tested release payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChatGPT-Legacy-${{ github.sha }}
+          path: .artifacts/release/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload full test evidence and generated project
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChatGPT-Legacy-test-evidence-${{ github.sha }}
+          path: |
+            .artifacts/**
+            !.artifacts/release/**
+            ChatGPTLegacy.xcodeproj/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish the tested tag as a GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" .artifacts/release/* \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" .artifacts/release/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --draft \
+              --title "ChatGPT Legacy 1.0.0" \
+              --notes-file docs/RELEASE_NOTES.md
+          fi
+          gh release edit "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft=false \
+            --latest

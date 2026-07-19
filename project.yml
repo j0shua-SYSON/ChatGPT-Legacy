@@ -1,0 +1,122 @@
+name: ChatGPTLegacy
+
+options:
+  bundleIdPrefix: io.github.j0shuasyson
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  xcodeVersion: "15.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: NO
+    ENABLE_BITCODE: NO
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING: YES
+    CLANG_WARN_BOOL_CONVERSION: YES
+    CLANG_WARN_COMMA: YES
+    CLANG_WARN_CONSTANT_CONVERSION: YES
+    CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS: YES
+    CLANG_WARN_DIRECT_OBJC_ISA_USAGE: YES_ERROR
+    CLANG_WARN_DOCUMENTATION_COMMENTS: YES
+    CLANG_WARN_EMPTY_BODY: YES
+    CLANG_WARN_ENUM_CONVERSION: YES
+    CLANG_WARN_INFINITE_RECURSION: YES
+    CLANG_WARN_INT_CONVERSION: YES
+    CLANG_WARN_NON_LITERAL_NULL_CONVERSION: YES
+    CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF: YES
+    CLANG_WARN_OBJC_LITERAL_CONVERSION: YES
+    CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: YES
+    CLANG_WARN_RANGE_LOOP_ANALYSIS: YES
+    CLANG_WARN_STRICT_PROTOTYPES: YES
+    CLANG_WARN_SUSPICIOUS_MOVE: YES
+    CLANG_WARN_UNGUARDED_AVAILABILITY: YES_AGGRESSIVE
+    CLANG_WARN_UNREACHABLE_CODE: YES
+    CLANG_WARN__DUPLICATE_METHOD_MATCH: YES
+    GCC_WARN_64_TO_32_BIT_CONVERSION: YES
+    GCC_WARN_ABOUT_RETURN_TYPE: YES_ERROR
+    GCC_WARN_UNDECLARED_SELECTOR: YES
+    GCC_WARN_UNINITIALIZED_AUTOS: YES_AGGRESSIVE
+    GCC_WARN_UNUSED_FUNCTION: YES
+    GCC_WARN_UNUSED_VARIABLE: YES
+
+targets:
+  ChatGPTLegacy:
+    type: application
+    platform: iOS
+    sources:
+      - path: ChatGPTLegacy
+        excludes:
+          - Resources/Info.plist
+          - Resources/Assets.xcassets
+    resources:
+      - path: ChatGPTLegacy/Resources/Assets.xcassets
+    info:
+      path: ChatGPTLegacy/Resources/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.j0shuasyson.ChatGPTLegacy
+        PRODUCT_NAME: ChatGPT Legacy
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.0.0"
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_KEY_CFBundleDisplayName: ChatGPT Legacy
+
+  ChatGPTLegacyTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ChatGPTLegacyTests
+    dependencies:
+      - target: ChatGPTLegacy
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.j0shuasyson.ChatGPTLegacyTests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/ChatGPT Legacy.app/ChatGPT Legacy"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+
+  ChatGPTLegacyUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: ChatGPTLegacyUITests
+    dependencies:
+      - target: ChatGPTLegacy
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.j0shuasyson.ChatGPTLegacyUITests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: ChatGPTLegacy
+
+schemes:
+  ChatGPTLegacy:
+    build:
+      targets:
+        ChatGPTLegacy: all
+        ChatGPTLegacyTests: [test]
+        ChatGPTLegacyUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - name: ChatGPTLegacyTests
+          parallelizable: false
+          randomExecutionOrder: true
+        - name: ChatGPTLegacyUITests
+          parallelizable: false
+          randomExecutionOrder: false
+    archive:
+      config: Release
